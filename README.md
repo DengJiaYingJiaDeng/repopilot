@@ -1,86 +1,125 @@
 # RepoPilot
 
-RepoPilot is an experimental local repository retrieval and issue-investigation system designed to evolve into an Agentic RAG coding assistant.
+RepoPilot is an experimental repository retrieval and issue investigation system. It indexes a local Python repository, ranks likely files and symbols for a bug report, and can optionally ask an LLM to form a **tentative** root-cause hypothesis with investigation steps and a test plan.
 
-## Problem
+## Why it exists
 
-An issue report often names a symptom, while the relevant code is spread across files and symbols. RepoPilot turns a local repository into searchable code chunks and returns likely investigation starting points. It does **not** infer a root cause or generate a fix.
+Issue reports describe symptoms; the related code can be spread across modules, tests, and symbols. RepoPilot makes the retrieval step measurable and provides bounded, read-only tools for further investigation. It never edits the target repository or claims to have executed its tests.
 
-## Current features
+## Implemented
 
-- Scan `.py` and `.md` files under a configured local root; ignore build and dependency directories, binary files, oversized files, and symlinks.
-- Extract Python modules, classes, functions, and async functions with AST and line ranges; split Markdown by headings.
-- Rank chunks with a simple keyword baseline or BM25 over paths, symbol names, and content.
-- Evaluate file-level Recall@K and MRR on a curated JSONL issue dataset.
-- Expose health, indexing, search, and basic issue-context analysis through FastAPI.
-- Keep one repository index in process memory. Indexing another repository replaces it; restarting the process clears it.
+- Safe local ingestion of `.py` and `.md` files under `REPOPILOT_ALLOWED_ROOT`; ignores dependencies, symlinks, binary and oversized files.
+- AST extraction of Python modules, classes, functions, and async functions with source line ranges; Markdown section splitting.
+- Keyword and BM25 retrieval; optional embedding cosine search, BM25/vector reciprocal-rank fusion, and cross-encoder reranking.
+- File-level Recall@K and MRR@K evaluation from JSONL labels, including a five-issue [Click benchmark](evaluation/README.md) at a pinned pre-fix revision.
+- FastAPI endpoints for indexing, search, context analysis, and optional bounded LLM investigation.
+- A read-only three-tool MCP server; an optional LangGraph workflow that routes incomplete investigations to review.
+- Ruff, strict mypy, pytest, GitHub Actions, and a default Docker image that requires no model key.
 
 ## Architecture
 
 ```text
-local repository
-  -> ingestion.py: safe file scan
-  -> parsing.py: Python AST / Markdown sections
-  -> CodeChunk objects
-  -> service.py: in-memory index
-  -> retrieval.py: keyword or BM25 ranking
-  -> api/app.py: HTTP responses
+repository -> safe scan -> Python AST / Markdown chunks -> in-memory snapshot
+                                                |
+issue text -> keyword / BM25 / optional vector + hybrid + reranker
+                                                |
+                  /search, /analyze, evaluation, MCP tools
+                                                |
+             optional model tool loop -> /investigate
+                            optional LangGraph routing
 ```
 
-`CodeChunk` records path, symbol, language, content, and line range so later retrieval methods can use the same source representation. `Retriever` separates corpus indexing from querying. The keyword method is the baseline; BM25 computes corpus statistics during indexing. Vector, hybrid, and agent modules will be introduced when their behavior is implemented, rather than as empty classes.
+`CodeChunk` keeps repository-relative path, symbol, source, and line range. Retriever implementations share `index` and `search`. The model can only call `search_code`, `read_file`, and `find_symbol` against the indexed snapshot. The loop caps tool calls and rejects cited files absent from observed evidence. A hypothesis remains unverified until a developer checks the code and runs tests.
 
 ## Quick start
 
-Requires Python 3.12 or newer.
+Requires Python 3.12+.
 
 ```bash
 python3.12 -m venv .venv
 source .venv/bin/activate
 python -m pip install -e ".[dev]"
-export REPOPILOT_ALLOWED_ROOT=/absolute/path/to/your/workspace
+export REPOPILOT_ALLOWED_ROOT=/absolute/path/to/workspace
 uvicorn repopilot.api.app:app --host 127.0.0.1 --port 8000
 ```
 
-Open `http://127.0.0.1:8000/docs` for interactive API documentation. Set `REPOPILOT_ALLOWED_ROOT` to the parent directory of repositories you want to index. By default it is the server's current working directory. The API rejects paths outside that root and skips symlinks inside a repository.
-
-Example:
+Interactive API documentation is at `http://127.0.0.1:8000/docs`. Index a repository beneath the allowed root:
 
 ```bash
 curl -X POST http://127.0.0.1:8000/repositories/index \
   -H 'Content-Type: application/json' \
-  -d '{"path":"/absolute/path/to/your/workspace/project"}'
-
+  -d '{"path":"/absolute/path/to/workspace/project"}'
 curl -X POST http://127.0.0.1:8000/search \
   -H 'Content-Type: application/json' \
   -d '{"query":"environment config","top_k":5,"method":"bm25"}'
-
 curl -X POST http://127.0.0.1:8000/analyze \
   -H 'Content-Type: application/json' \
-  -d '{"issue_text":"MCP server configuration fails to load","top_k":5}'
+  -d '{"issue_text":"MCP server configuration fails to load","method":"bm25"}'
 ```
 
-## API
-
-| Endpoint | Purpose |
+| Endpoint | Behavior |
 | --- | --- |
-| `GET /health` | Readiness response, `{"status":"ok"}` |
-| `POST /repositories/index` | Replace the in-memory index from a local path; report indexed and skipped files |
-| `POST /search` | Return up to `top_k` scored code chunks |
-| `POST /analyze` | Return retrieved chunks plus deduplicated files and symbols for an issue description |
+| `GET /health` | Readiness response |
+| `POST /repositories/index` | Replace the single in-memory repository snapshot |
+| `POST /search` | Return scored chunks and source excerpts |
+| `POST /analyze` | Return retrieved files and symbols; no generated hypothesis |
+| `POST /investigate` | Optional model tool loop; returns hypothesis, steps, plan, evidence, and tool trace |
 
-Search before indexing returns HTTP 409. Invalid or disallowed repository paths return HTTP 400. `/analyze` only retrieves likely context; it does not provide a root-cause hypothesis, investigation plan, or test plan yet.
+Use `method=keyword` or `bm25` by default. `vector` and `hybrid` require an embedding provider; `rerank` requires a configured cross-encoder. Search before indexing returns HTTP 409. An unavailable method returns HTTP 400. Investigation without an LLM configuration returns HTTP 503.
 
-## Retrieval evaluation
+## Optional model features
 
-Provide one JSON object per line with `issue_id`, `issue_text`, and repository-relative `relevant_files`. The included `tests/fixtures/eval_cases.jsonl` is synthetic and only tests the evaluation pipeline; its scores are not project-quality evidence. Run:
+### Local embeddings and reranking
 
 ```bash
-python -m repopilot.evaluation tests/fixtures/sample_repo tests/fixtures/eval_cases.jsonl --top-k 3
+python -m pip install -e ".[local]"
+export REPOPILOT_EMBEDDING_PROVIDER=local
+export REPOPILOT_EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+export REPOPILOT_RERANK_MODEL=cross-encoder/ms-marco-MiniLM-L6-v2
 ```
 
-The report includes per-case predicted files, Recall@K, reciprocal rank, mean Recall@K, and MRR@K. Use a fixed repository revision and manually checked real issues before making performance claims.
+The first run downloads model weights. Set `REPOPILOT_EMBEDDING_PROVIDER=none` and omit `REPOPILOT_RERANK_MODEL` for the lightweight default. Dense and reranked quality is not reported here because no live model evaluation has been run.
 
-## Testing
+### OpenAI embeddings and investigation
+
+```bash
+python -m pip install -e ".[openai]"
+export REPOPILOT_OPENAI_API_KEY=your_key_here
+export REPOPILOT_EMBEDDING_PROVIDER=openai
+export REPOPILOT_EMBEDDING_MODEL=text-embedding-3-small
+export REPOPILOT_INVESTIGATION_MODEL=your_responses_api_model
+# Optional explicit graph: python -m pip install -e ".[graph]"
+# export REPOPILOT_INVESTIGATION_WORKFLOW=langgraph
+```
+
+Then index a repository and call `/investigate` with `{"issue_text":"...","method":"hybrid"}`. OpenAI embedding at indexing time sends chunk text to the API and incurs API usage. Investigation sends issue text, retrieved source excerpts, and tool results to the API. Use only repositories you are authorized to send to that provider. No API key belongs in a commit. The live OpenAI path needs a valid key and was not exercised by the offline test suite.
+
+## MCP
+
+```bash
+python -m pip install -e ".[mcp]"
+python -m repopilot.mcp_server /absolute/path/to/workspace/project
+```
+
+This starts a local stdio MCP server with `search_code`, `read_file`, and `find_symbol`. It indexes one repository on launch. Standard output is reserved for MCP protocol messages. The tools read only the snapshot; they do not execute shell commands or modify files.
+
+## Evaluation
+
+```bash
+python -m repopilot.evaluation /path/to/click-at-8.2.1 \
+  evaluation/click_8_2_1_issues.jsonl --top-k 3
+```
+
+On Click commit `fd183b2ced1cb5857784fe7fb22f4982f671f098`, with five manually selected historical issues and source-file labels:
+
+| Method | File Recall@3 | File MRR@3 |
+| --- | ---: | ---: |
+| Keyword | 0.40 | 0.367 |
+| BM25 | 0.90 | 0.80 |
+
+BM25 missed one of two relevant source files for issue #2952 in the top three and ranked tests before source for some cases. This small **development** set was selected and checked manually; the scores do not establish generalization. The included synthetic fixture exists only to test the evaluator. Use a larger held-out set before making broad quality claims.
+
+## Verification
 
 ```bash
 ruff check .
@@ -89,31 +128,19 @@ mypy
 pytest
 ```
 
-The tests cover file filtering, symlink and path boundaries, AST symbols and line numbers, keyword and BM25 ranking, evaluation metrics, and the API flow. They use a small repository in `tests/fixtures/sample_repo` and need no model API key.
+Offline tests use fake embedding and model providers where needed. The MCP tools are also tested with the official SDK's in-memory client. CI runs the same checks on pushes and pull requests.
 
 ## Docker
 
 ```bash
-docker build -t repopilot:0.2 .
+docker build -t repopilot:0.6 .
 docker run --rm -p 127.0.0.1:8000:8000 \
-  -v /absolute/path/to/your/workspace:/workspace:ro \
-  -e REPOPILOT_ALLOWED_ROOT=/workspace repopilot:0.2
+  -v /absolute/path/to/workspace:/workspace:ro \
+  -e REPOPILOT_ALLOWED_ROOT=/workspace repopilot:0.6
 ```
 
-If PyPI is slow in your region, pass `--build-arg PIP_INDEX_URL=<your trusted package index>` to `docker build`. Use `/workspace/project` as the indexing path from inside the container. The server has no authentication, so keep it bound to localhost. It reads local source contents and returns matched contents through the API; avoid indexing confidential repositories unless that behavior is acceptable in your environment.
+Use `/workspace/project` for the index request in the container. If PyPI is slow, pass `--build-arg PIP_INDEX_URL=<trusted-index>` during build. The default image includes lexical retrieval and the API; install optional extras in a custom image for model or MCP features. The server has no authentication and should stay bound to localhost.
 
-## Roadmap
+## Scope and limitations
 
-- **v0.1:** repository ingestion, AST parsing, keyword retrieval, FastAPI, tests and CI.
-- **v0.2 (current):** BM25 and a file-level evaluation pipeline.
-- **v0.3:** embeddings, hybrid retrieval, and reranking on a real issue dataset.
-- **v0.4:** add a small bounded agent loop for investigation steps.
-- **v0.5:** explore LangGraph when workflow state and human review require it.
-- **v0.6:** expose selected search tools through MCP.
-- **v1.0:** a measured, documented repository analysis system, contingent on evaluation results.
-
-For current baseline observations and the next milestone checklist, see [Development log](docs/DEVELOPMENT_LOG.md).
-
-## Project status
-
-This is a learning and portfolio project. Keyword scores indicate textual overlap, not correctness. Python syntax errors are reported as skipped files. The current index is ephemeral and scoped to one repository per server process. No LLM, embedding, reranker, database, frontend, or autonomous agent has been implemented.
+This is a portfolio-grade **prototype**, not a production coding agent. The index holds one repository per process and disappears on restart. Python module chunks duplicate symbol text, which can bias ranking. Chinese issue text is not segmented by the lexical tokenizer. There is no database, authorization layer, autonomous code modification, or cloud deployment. Optional model integrations are covered by fake-provider tests but still require live validation with credentials or downloaded weights. See the [development log](docs/DEVELOPMENT_LOG.md) for decisions and measured observations.
