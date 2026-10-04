@@ -12,13 +12,16 @@ from repopilot.domain import (
 )
 from repopilot.ingestion import scan_repository
 from repopilot.parsing import parse_markdown, parse_python
-from repopilot.retrieval import KeywordRetriever, Retriever
+from repopilot.retrieval import BM25Retriever, KeywordRetriever, Retriever
 
 
 class RepoPilotService:
-    def __init__(self, settings: Settings, retriever: Retriever | None = None) -> None:
+    def __init__(self, settings: Settings, retrievers: dict[str, Retriever] | None = None) -> None:
         self.settings = settings
-        self.retriever = retriever or KeywordRetriever()
+        self.retrievers = retrievers or {
+            "keyword": KeywordRetriever(),
+            "bm25": BM25Retriever(),
+        }
         self._indexed = False
 
     def index(self, path: Path) -> IndexSummary:
@@ -38,7 +41,8 @@ class RepoPilotService:
                 continue
             chunks.extend(parsed)
             indexed += 1
-        self.retriever.index(chunks)
+        for retriever in self.retrievers.values():
+            retriever.index(chunks)
         self._indexed = True
         return IndexSummary(
             repository=scan.repository,
@@ -47,13 +51,17 @@ class RepoPilotService:
             skipped_files=skipped,
         )
 
-    def search(self, query: str, top_k: int) -> list[ScoredChunk]:
+    def search(self, query: str, top_k: int, method: str = "keyword") -> list[ScoredChunk]:
         if not self._indexed:
             raise IndexNotReadyError("Index a repository before searching")
-        return self.retriever.search(query, top_k)
+        try:
+            retriever = self.retrievers[method]
+        except KeyError as exc:
+            raise ValueError(f"Unknown retrieval method: {method}") from exc
+        return retriever.search(query, top_k)
 
-    def analyze(self, issue_text: str, top_k: int) -> AnalysisResult:
-        matches = self.search(issue_text, top_k)
+    def analyze(self, issue_text: str, top_k: int, method: str = "keyword") -> AnalysisResult:
+        matches = self.search(issue_text, top_k, method)
         return AnalysisResult(
             query=issue_text,
             relevant_files=list(dict.fromkeys(item.chunk.file_path for item in matches)),

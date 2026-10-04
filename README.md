@@ -4,13 +4,14 @@ RepoPilot is an experimental local repository retrieval and issue-investigation 
 
 ## Problem
 
-An issue report often names a symptom, while the relevant code is spread across files and symbols. RepoPilot v0.1 turns a local repository into searchable code chunks and returns likely investigation starting points. It does **not** infer a root cause or generate a fix.
+An issue report often names a symptom, while the relevant code is spread across files and symbols. RepoPilot turns a local repository into searchable code chunks and returns likely investigation starting points. It does **not** infer a root cause or generate a fix.
 
 ## Current features
 
 - Scan `.py` and `.md` files under a configured local root; ignore build and dependency directories, binary files, oversized files, and symlinks.
 - Extract Python modules, classes, functions, and async functions with AST and line ranges; split Markdown by headings.
-- Rank chunks with a simple, explainable keyword score over paths, symbol names, and content.
+- Rank chunks with a simple keyword baseline or BM25 over paths, symbol names, and content.
+- Evaluate file-level Recall@K and MRR on a curated JSONL issue dataset.
 - Expose health, indexing, search, and basic issue-context analysis through FastAPI.
 - Keep one repository index in process memory. Indexing another repository replaces it; restarting the process clears it.
 
@@ -22,11 +23,11 @@ local repository
   -> parsing.py: Python AST / Markdown sections
   -> CodeChunk objects
   -> service.py: in-memory index
-  -> retrieval.py: keyword ranking
+  -> retrieval.py: keyword or BM25 ranking
   -> api/app.py: HTTP responses
 ```
 
-`CodeChunk` records path, symbol, language, content, and line range so later retrieval methods can use the same source representation. `Retriever` has one method because keyword search is currently its only implementation. Vector, hybrid, evaluation, and agent modules will be introduced when their behavior is implemented, rather than as empty classes.
+`CodeChunk` records path, symbol, language, content, and line range so later retrieval methods can use the same source representation. `Retriever` separates corpus indexing from querying. The keyword method is the baseline; BM25 computes corpus statistics during indexing. Vector, hybrid, and agent modules will be introduced when their behavior is implemented, rather than as empty classes.
 
 ## Quick start
 
@@ -51,7 +52,7 @@ curl -X POST http://127.0.0.1:8000/repositories/index \
 
 curl -X POST http://127.0.0.1:8000/search \
   -H 'Content-Type: application/json' \
-  -d '{"query":"environment config","top_k":5}'
+  -d '{"query":"environment config","top_k":5,"method":"bm25"}'
 
 curl -X POST http://127.0.0.1:8000/analyze \
   -H 'Content-Type: application/json' \
@@ -69,6 +70,16 @@ curl -X POST http://127.0.0.1:8000/analyze \
 
 Search before indexing returns HTTP 409. Invalid or disallowed repository paths return HTTP 400. `/analyze` only retrieves likely context; it does not provide a root-cause hypothesis, investigation plan, or test plan yet.
 
+## Retrieval evaluation
+
+Provide one JSON object per line with `issue_id`, `issue_text`, and repository-relative `relevant_files`. The included `tests/fixtures/eval_cases.jsonl` is synthetic and only tests the evaluation pipeline; its scores are not project-quality evidence. Run:
+
+```bash
+python -m repopilot.evaluation tests/fixtures/sample_repo tests/fixtures/eval_cases.jsonl --top-k 3
+```
+
+The report includes per-case predicted files, Recall@K, reciprocal rank, mean Recall@K, and MRR@K. Use a fixed repository revision and manually checked real issues before making performance claims.
+
 ## Testing
 
 ```bash
@@ -78,24 +89,24 @@ mypy
 pytest
 ```
 
-The tests cover file filtering, symlink and path boundaries, AST symbols and line numbers, keyword ranking, and the API flow. They use a small repository in `tests/fixtures/sample_repo` and need no model API key.
+The tests cover file filtering, symlink and path boundaries, AST symbols and line numbers, keyword and BM25 ranking, evaluation metrics, and the API flow. They use a small repository in `tests/fixtures/sample_repo` and need no model API key.
 
 ## Docker
 
 ```bash
-docker build -t repopilot:0.1 .
+docker build -t repopilot:0.2 .
 docker run --rm -p 127.0.0.1:8000:8000 \
   -v /absolute/path/to/your/workspace:/workspace:ro \
-  -e REPOPILOT_ALLOWED_ROOT=/workspace repopilot:0.1
+  -e REPOPILOT_ALLOWED_ROOT=/workspace repopilot:0.2
 ```
 
 If PyPI is slow in your region, pass `--build-arg PIP_INDEX_URL=<your trusted package index>` to `docker build`. Use `/workspace/project` as the indexing path from inside the container. The server has no authentication, so keep it bound to localhost. It reads local source contents and returns matched contents through the API; avoid indexing confidential repositories unless that behavior is acceptable in your environment.
 
 ## Roadmap
 
-- **v0.1 (current):** repository ingestion, AST parsing, keyword retrieval, FastAPI, tests and CI.
-- **v0.2:** implement BM25, then embeddings and hybrid retrieval; compare against the v0.1 baseline.
-- **v0.3:** add reranking and a labeled issue-to-file retrieval evaluation set.
+- **v0.1:** repository ingestion, AST parsing, keyword retrieval, FastAPI, tests and CI.
+- **v0.2 (current):** BM25 and a file-level evaluation pipeline.
+- **v0.3:** embeddings, hybrid retrieval, and reranking on a real issue dataset.
 - **v0.4:** add a small bounded agent loop for investigation steps.
 - **v0.5:** explore LangGraph when workflow state and human review require it.
 - **v0.6:** expose selected search tools through MCP.
@@ -105,4 +116,4 @@ For current baseline observations and the next milestone checklist, see [Develop
 
 ## Project status
 
-This is a learning and portfolio project. Keyword scores indicate textual overlap, not correctness. Python syntax errors are reported as skipped files. The current index is ephemeral and scoped to one repository per server process. No LLM, embedding, BM25, reranker, database, frontend, or autonomous agent has been implemented.
+This is a learning and portfolio project. Keyword scores indicate textual overlap, not correctness. Python syntax errors are reported as skipped files. The current index is ephemeral and scoped to one repository per server process. No LLM, embedding, reranker, database, frontend, or autonomous agent has been implemented.

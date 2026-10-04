@@ -1,1 +1,1 @@
-"""RepoPilot v0.1."""
+"""RepoPilot package."""

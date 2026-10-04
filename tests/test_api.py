@@ -21,6 +21,11 @@ def test_end_to_end_api() -> None:
     search = client.post("/search", json={"query": "environment config", "top_k": 5})
     assert search.status_code == 200
     assert search.json()[0]["chunk"]["symbol_name"] == "load_environment_config"
+    bm25 = client.post(
+        "/search", json={"query": "environment config", "top_k": 5, "method": "bm25"}
+    )
+    assert bm25.status_code == 200
+    assert any(item["chunk"]["symbol_name"] == "load_environment_config" for item in bm25.json())
 
     analysis = client.post("/analyze", json={"issue_text": "MCP server config", "top_k": 5})
     assert analysis.status_code == 200

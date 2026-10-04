@@ -30,30 +30,9 @@ The current tokenizer uses English letters and digits, with underscore and camel
 - Docker image builds with a configurable package index. A live container returned `{"status":"ok"}`, indexed the read-only fixture (5 files, 12 chunks), and ranked `load_environment_config` first for `environment config`.
 - GitHub Actions CI passes on `main`.
 
-## 2026-10-05 — owner handoff checklist
+## 2026-10-04 — v0.2 retrieval evaluation
 
-These are the steps for the project owner to do personally before claiming technical ownership in a resume or interview:
-
-- [ ] Clone the GitHub repository into a fresh directory. Follow the README to install and run it without using the existing local `.venv`.
-- [ ] Trace one request from `POST /repositories/index` through file scanning, AST parsing, `CodeChunk`, and `Retriever.index`; explain each step in your own words.
-- [ ] Trace one `/search` request and calculate one chunk's keyword score by hand. Explain why a test or module chunk may rank ahead of a function.
-- [ ] Run the three queries above on your clone. Record any changed rankings and why they changed.
-- [ ] Find 3–5 real, closed GitHub issues with linked fixes from one public Python repository. Record the issue text and changed file paths in personal notes using `{"issue_id": "...", "issue_text": "...", "relevant_files": ["..."]}`; do not add a full evaluation dataset or metric code yet.
-- [ ] Create a branch named `feat/bm25-retrieval` when ready to implement the next milestone yourself. Open a pull request to this repository's `main` after local checks pass.
-
-### Next milestone: BM25 retrieval
-
-Implement BM25 yourself using the existing `Retriever` contract. First decide how to tokenize queries and chunks and which fields receive weight. During `index`, calculate document frequency and document length statistics. During `search`, return scored chunks with deterministic tie ordering. Preserve the existing API responses.
-
-Acceptance checks for that PR:
-
-- [ ] A clear explanation of the scoring formula and any field weighting appears in the PR description.
-- [ ] Unit tests cover an exact match, a term occurring in multiple chunks, a length-sensitive case, an empty query, and reindexing a different repository.
-- [ ] Ruff, mypy, pytest, and CI pass without an external model API.
-- [ ] Compare the keyword baseline and BM25 on the same hand-checked issue examples; report successes and failures, not only favorable cases.
-
-### Resume evidence to build over the next 1–2 months
-
-A credible project entry needs a runnable demo, a documented test set, measured retrieval quality, a clear explanation of your own changes, and honest failure analysis. Your own repository's pull requests show your development process; an accepted contribution to another project's repository is a separate open-source contribution.
-
-Current wording may say **local repository retrieval and issue-context analysis baseline**. Do not describe v0.1 as a finished Agent, RAG generator, root-cause analyzer, or production deployment.
+- Added BM25 with path terms repeated twice and symbol terms three times. This is an explicit field weighting heuristic, not a tuned model.
+- Added file-level Recall@K and MRR@K evaluation from checked JSONL labels. Deduplicating paths prevents multiple chunks from one file consuming the file-level ranking.
+- On the two synthetic smoke cases, keyword scores Recall@3 = 1.0 and MRR@3 = 1.0; BM25 scores Recall@3 = 1.0 and MRR@3 = 0.5. The tiny synthetic fixture verifies plumbing only. It provides no evidence that either method generalizes to real issues.
+- Next: create a real issue dataset at a pinned repository revision, then compare semantic and hybrid methods against these baselines.

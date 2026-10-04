@@ -1,0 +1,2 @@
+{"issue_id":"fixture-config","issue_text":"environment config fails to load","relevant_files":["config.py"]}
+{"issue_id":"fixture-startup","issue_text":"MCP server startup fails","relevant_files":["mcp_server.py"]}
