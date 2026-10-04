@@ -72,3 +72,14 @@ The current tokenizer uses English letters and digits, with underscore and camel
 - 46 offline tests passed; Ruff lint/format and strict mypy passed.
 - The terminal demo ran against a real local model, including recovery from an invalid line range, and returned a structured hypothesis. Its server process was stopped afterward.
 - Docker `repopilot:0.7` built and passed a live HTTP smoke check with a read-only fixture mount: health, indexing, BM25 search, version metadata, and HTTP 503 for an unconfigured investigation model. The test container was removed.
+
+## 2026-10-04 — v0.8 visual workbench
+
+- Added an independent React/TypeScript/Vite frontend with Chinese navigation, a clearly labeled historical fixture example, validated local JSON import/export, and live FastAPI investigation requests.
+- The report has separate summary, source evidence, actual tool timeline, and proposed-test views. Failed tool calls are retained. A completed protocol is explicitly distinguished from a correct diagnosis or an executed test.
+- Added `/workspace` capability metadata and a restricted loopback CORS allowlist. The page offers only retrieval methods actually configured in the backend.
+- Added request-scoped language preference through FastAPI and LangGraph. The local model sometimes continued in English despite Chinese instructions, so an optional, single translation call now preserves the original answer and checks unchanged evidence paths and list lengths. Both the translation notice and original are visible. This does not fix erroneous hypotheses.
+- Added `scripts/start_workbench.sh` to build and start the frontend, backend, and local model as separate processes; it waits for readiness, refuses occupied ports, and stops only its children on exit. Private machine-specific wrappers and Chinese study notes remain outside Git.
+- Browser acceptance checked actual report import, source line display, tool failure/retry details, test-plan labeling, and a real local-model request. No browser console errors were observed during those flows.
+
+- Final v0.8 acceptance: 51 Python tests and 6 frontend tests pass; Ruff, mypy, TypeScript and production build pass. A real browser request returned a labeled Chinese rendering in 5.8 seconds. JSON file download could not be confirmed in the in-app browser; the export dialog also supports copying the complete report.

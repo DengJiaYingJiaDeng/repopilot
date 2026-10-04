@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Annotated, Literal
 
 from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from repopilot.agent import InvestigationResult, Investigator, OpenAIInvestigationModel
@@ -30,6 +31,7 @@ class SearchRequest(BaseModel):
 
 
 class InvestigateRequest(BaseModel):
+    response_language: Literal["en", "zh"] = "en"
     issue_text: str = Field(min_length=1, max_length=4000)
     method: Literal["keyword", "bm25", "vector", "hybrid", "rerank"] = "bm25"
 
@@ -49,8 +51,14 @@ Service = Annotated[RepoPilotService, Depends(get_service)]
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
-    application = FastAPI(title="RepoPilot", version="0.7.0")
+    application = FastAPI(title="RepoPilot", version="0.8.0")
     config = settings or Settings()
+    application.add_middleware(
+        CORSMiddleware,
+        allow_origins=config.cors_origins,
+        allow_methods=["GET", "POST"],
+        allow_headers=["Content-Type"],
+    )
     application.state.service = RepoPilotService(config)
     application.state.investigator = None
     application.state.investigation_graph = None
@@ -82,6 +90,20 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @application.get("/health")
     def health() -> dict[str, str]:
         return {"status": "ok"}
+
+    @application.get("/workspace")
+    def workspace(service: Service) -> dict[str, object]:
+        example = Path(__file__).resolve().parents[3] / "tests" / "fixtures" / "sample_repo"
+        allowed = config.allowed_root.resolve()
+        available_example = example.is_dir() and example.is_relative_to(allowed)
+        return {
+            "allowed_root": str(allowed),
+            "example_repository": str(example) if available_example else None,
+            "methods": list(service.retrievers),
+            "model": config.investigation_model,
+            "provider": config.investigation_provider,
+            "investigation_configured": application.state.investigator is not None,
+        }
 
     @application.post("/repositories/index", response_model=IndexSummary)
     def index_repository(body: IndexRequest, service: Service) -> IndexSummary:
@@ -116,12 +138,20 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         try:
             graph = request.app.state.investigation_graph
             if graph is not None:
-                state = graph.invoke({"issue_text": body.issue_text, "method": body.method})
+                state = graph.invoke(
+                    {
+                        "issue_text": body.issue_text,
+                        "method": body.method,
+                        "response_language": body.response_language,
+                    }
+                )
                 result: InvestigationResult = state["result"]
                 return result.model_copy(
                     update={"review_required": state.get("review_required", False)}
                 )
-            return investigator.investigate(body.issue_text, body.method)
+            return investigator.investigate(
+                body.issue_text, body.method, response_language=body.response_language
+            )
         except IndexNotReadyError as exc:
             raise HTTPException(status_code=409, detail=str(exc)) from exc
         except ValueError as exc:

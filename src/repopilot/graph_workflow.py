@@ -1,6 +1,6 @@
 """Optional LangGraph orchestration for retrieval, investigation, and review routing."""
 
-from typing import Any, TypedDict
+from typing import Any, Literal, TypedDict
 
 from langgraph.graph import END, START, StateGraph
 
@@ -10,6 +10,7 @@ from repopilot.domain import AnalysisResult
 
 class InvestigationState(TypedDict, total=False):
     issue_text: str
+    response_language: Literal["en", "zh"]
     method: str
     initial_context: AnalysisResult
     result: InvestigationResult
@@ -32,6 +33,7 @@ def build_investigation_graph(investigator: Investigator) -> Any:
                 state["issue_text"],
                 state.get("method", "bm25"),
                 initial_context=state["initial_context"],
+                response_language=state.get("response_language", "en"),
             )
         }
 

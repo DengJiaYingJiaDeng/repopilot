@@ -14,3 +14,7 @@ build/
 *.gguf
 models/
 .local/
+
+node_modules/
+*.tsbuildinfo
+frontend/.env.local

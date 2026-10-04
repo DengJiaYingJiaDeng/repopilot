@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="REPOPILOT_", extra="ignore")
 
     allowed_root: Path = Field(default_factory=Path.cwd)
+    cors_origins: list[str] = ["http://127.0.0.1:5173", "http://localhost:5173"]
     max_file_bytes: int = Field(default=1_000_000, gt=0)
     embedding_provider: Literal["none", "local", "openai"] = "none"
     embedding_model: str | None = None

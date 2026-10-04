@@ -9,7 +9,7 @@ from fastapi.testclient import TestClient
 from pytest import MonkeyPatch
 from test_agent import FakeModel, indexed_service
 
-from repopilot.agent import Investigator, ModelTurn
+from repopilot.agent import CHINESE_OUTPUT_PREFIX, Investigator, ModelTurn
 from repopilot.api.app import create_app
 from repopilot.config import Settings
 from repopilot.domain import ModelProviderError
@@ -50,11 +50,12 @@ def test_local_model_preserves_tool_protocol(monkeypatch: MonkeyPatch) -> None:
         return io.BytesIO(next(replies))
 
     monkeypatch.setattr(model._opener, "open", fake_open)
-    first = model.next_turn("config bug", None, [])
+    first = model.next_turn(CHINESE_OUTPUT_PREFIX + "\nconfig bug", None, [])
     second = model.next_turn(None, first.response_id, [{"call_id": "call-1", "output": "source"}])
     assert first.calls[0].name == "read_file"
     assert second.output_text == "{}"
     assert bodies[0]["tools"][0]["function"]["name"] == "read_file"
+    assert "必须使用简体中文" in bodies[0]["messages"][0]["content"]
     messages = bodies[1]["messages"]
     assert [item["role"] for item in messages] == ["system", "user", "assistant", "tool"]
     assert messages[-1] == {"role": "tool", "tool_call_id": "call-1", "content": "source"}
@@ -157,3 +158,41 @@ def test_read_tool_reaches_code_beyond_first_excerpt(tmp_path: Path) -> None:
     assert parsed["more_lines"] is False
     _, bad = investigator._run_tool("read_file", '{"path":"long.py","start_line":999}')
     assert "error" in json.loads(bad)
+
+
+@pytest.mark.parametrize("changed_citation", [False, True])
+def test_chinese_translation_retains_original_and_rejects_changed_citations(
+    monkeypatch: MonkeyPatch, changed_citation: bool
+) -> None:
+    original = {
+        "root_cause_hypothesis": "The caller ignores a failed validation result.",
+        "investigation_steps": ["Read the caller"],
+        "test_plan": ["Test an empty name"],
+        "evidence_files": ["server.py"],
+    }
+    translated = {
+        "root_cause_hypothesis": "调用方忽略了校验失败的结果。",
+        "investigation_steps": ["阅读调用方代码"],
+        "test_plan": ["测试空名字"],
+        "evidence_files": ["invented.py" if changed_citation else "server.py"],
+    }
+    model = LocalChatModel("test-model")
+    requests = []
+
+    def fake_open(request: Any, timeout: float) -> io.BytesIO:
+        requests.append(json.loads(request.data))
+        return io.BytesIO(chat_response({"role": "assistant", "content": json.dumps(translated)}))
+
+    monkeypatch.setattr(model._opener, "open", fake_open)
+    text = json.dumps(original)
+    result, source, note = model._chinese_report(text)
+    assert len(requests) == 1
+    assert "tools" not in requests[0]
+    if changed_citation:
+        assert result == text
+        assert source is None
+        assert note == "中文转述未完成，保留模型原文。"
+    else:
+        assert json.loads(result) == translated
+        assert source == text
+        assert note == "中文转述由本地模型生成，原始回答已保留。"

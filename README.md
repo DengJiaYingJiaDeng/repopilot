@@ -31,6 +31,18 @@ issue text -> keyword / BM25 / optional vector + hybrid + reranker
 
 `CodeChunk` keeps repository-relative path, symbol, source, and line range. Retriever implementations share `index` and `search`. The model can only call `search_code`, `read_file`, and `find_symbol` against the indexed snapshot. The loop caps tool calls and rejects cited files absent from observed evidence. A hypothesis remains unverified until a developer checks the code and runs tests.
 
+## Visual workbench (v0.8)
+
+An independent React/TypeScript frontend turns investigation JSON into four views: **summary, code evidence, tool-call timeline, and proposed tests**. It supports local JSON import/export and live investigations through FastAPI. New investigations can request Chinese prose; historical/imported output is kept unchanged.
+
+After the Python, local-model, and frontend dependencies are installed:
+
+```bash
+bash scripts/start_workbench.sh
+```
+
+Open **http://127.0.0.1:5173**. The page starts with a clearly labeled historical fixture report. Import your own `result.json` or choose a local repository and start a new investigation. See the [full frontend/backend setup and reading guide](docs/WEB_WORKBENCH.md).
+
 ## Quick start
 
 Requires Python 3.12+.
@@ -60,6 +72,7 @@ curl -X POST http://127.0.0.1:8000/analyze \
 | Endpoint | Behavior |
 | --- | --- |
 | `GET /health` | Readiness response |
+| `GET /workspace` | Available retrieval methods, configured model, allowed root, and example path |
 | `POST /repositories/index` | Replace the single in-memory repository snapshot |
 | `POST /search` | Return scored chunks and source excerpts |
 | `POST /analyze` | Return retrieved files and symbols; no generated hypothesis |
@@ -150,10 +163,10 @@ Offline tests use fake embedding and model providers where needed. Live Qwen and
 ## Docker
 
 ```bash
-docker build -t repopilot:0.7 .
+docker build -t repopilot:0.8 .
 docker run --rm -p 127.0.0.1:8000:8000 \
   -v /absolute/path/to/workspace:/workspace:ro \
-  -e REPOPILOT_ALLOWED_ROOT=/workspace repopilot:0.7
+  -e REPOPILOT_ALLOWED_ROOT=/workspace repopilot:0.8
 ```
 
 Use `/workspace/project` for the index request in the container. If PyPI is slow, pass `--build-arg PIP_INDEX_URL=<trusted-index>` during build. The default image includes lexical retrieval and the API; install optional extras in a custom image for model or MCP features. The server has no authentication and should stay bound to localhost.
