@@ -89,7 +89,7 @@ docker run --rm -p 127.0.0.1:8000:8000 \
   -e REPOPILOT_ALLOWED_ROOT=/workspace repopilot:0.1
 ```
 
-Use `/workspace/project` as the indexing path from inside the container. The server has no authentication, so keep it bound to localhost. It reads local source contents and returns matched contents through the API; avoid indexing confidential repositories unless that behavior is acceptable in your environment.
+If PyPI is slow in your region, pass `--build-arg PIP_INDEX_URL=<your trusted package index>` to `docker build`. Use `/workspace/project` as the indexing path from inside the container. The server has no authentication, so keep it bound to localhost. It reads local source contents and returns matched contents through the API; avoid indexing confidential repositories unless that behavior is acceptable in your environment.
 
 ## Roadmap
 
