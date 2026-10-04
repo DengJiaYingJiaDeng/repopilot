@@ -57,3 +57,18 @@ The current tokenizer uses English letters and digits, with underscore and camel
 - The default Docker build and lexical evaluation are runnable without a key. The model-backed retrieval, reranker, and live LLM response have not been evaluated against a real downloaded model or API key in this environment; fake-provider tests verify wiring, not model quality.
 - The benchmark is a development set. A held-out issue set and an error audit would be needed for stronger retrieval claims.
 - The index remains in memory and one-repository-only. The server has no authentication, so it is intentionally local-only.
+
+## 2026-10-04 — v0.7 live local model validation
+
+- Added a loopback Chat Completions adapter for Qwen/llama.cpp, with a fresh session per investigation, required initial source read, disabled internet proxies, refused redirects, output size/token checks, and explicit provider-error results.
+- Added source line ranges and truncation metadata to the model's read tool. All incomplete direct investigations now set the review flag, matching graph routing.
+- Ran actual MiniLM embedding/reranking: BM25 Recall@3 0.90 / MRR@3 0.80; hybrid 0.80 / 0.767; reranked hybrid 0.80 / 0.90. All five methods and pinned model versions are recorded under `evaluation/results/`.
+- Ran all five Click investigations through FastAPI + LangGraph + local Qwen3-4B. After resolving tool-choice compatibility and context/prompt failures, all five completed the protocol with 2–3 real tool calls. This did **not** establish diagnosis accuracy: manual inspection found wrong and weak hypotheses, documented in `evaluation/LOCAL_MODEL_REPORT.md`.
+- Added a terminal demo, local server startup script, and CPU dependency constraints. Runtime binaries and model weights are stored outside the Git repository. OpenAI's live path remains untested without credentials.
+- This supersedes the earlier v0.6 note that downloaded-model paths were untested. The current deliverable is a runnable portfolio prototype with measured limitations.
+
+### v0.7 delivery checks
+
+- 46 offline tests passed; Ruff lint/format and strict mypy passed.
+- The terminal demo ran against a real local model, including recovery from an invalid line range, and returned a structured hypothesis. Its server process was stopped afterward.
+- Docker `repopilot:0.7` built and passed a live HTTP smoke check with a read-only fixture mount: health, indexing, BM25 search, version metadata, and HTTP 503 for an unconfigured investigation model. The test container was removed.

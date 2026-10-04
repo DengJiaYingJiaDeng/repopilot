@@ -15,6 +15,7 @@ from repopilot.domain import (
     RepositoryError,
     ScoredChunk,
 )
+from repopilot.local_model import LocalChatModel
 from repopilot.service import RepoPilotService
 
 
@@ -48,18 +49,29 @@ Service = Annotated[RepoPilotService, Depends(get_service)]
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
-    application = FastAPI(title="RepoPilot", version="0.6.0")
+    application = FastAPI(title="RepoPilot", version="0.7.0")
     config = settings or Settings()
     application.state.service = RepoPilotService(config)
     application.state.investigator = None
     application.state.investigation_graph = None
     if config.investigation_model:
-        key = config.openai_api_key.get_secret_value() if config.openai_api_key else ""
-        application.state.investigator = Investigator(
-            application.state.service,
-            OpenAIInvestigationModel(key, config.investigation_model),
-            config.max_agent_calls,
-        )
+        if config.investigation_provider == "local":
+            application.state.investigator = Investigator(
+                application.state.service,
+                max_calls=config.max_agent_calls,
+                model_factory=lambda: LocalChatModel(
+                    config.investigation_model or "local-model",
+                    config.local_model_url,
+                    config.model_timeout,
+                ),
+            )
+        else:
+            key = config.openai_api_key.get_secret_value() if config.openai_api_key else ""
+            application.state.investigator = Investigator(
+                application.state.service,
+                OpenAIInvestigationModel(key, config.investigation_model),
+                config.max_agent_calls,
+            )
         if config.investigation_workflow == "langgraph":
             from repopilot.graph_workflow import build_investigation_graph
 

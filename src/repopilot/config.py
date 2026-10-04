@@ -18,5 +18,8 @@ class Settings(BaseSettings):
     rerank_model: str | None = None
     rerank_candidates: int = Field(default=20, ge=1, le=100)
     investigation_model: str | None = None
+    investigation_provider: Literal["openai", "local"] = "openai"
+    local_model_url: str = "http://127.0.0.1:8081/v1"
+    model_timeout: float = Field(default=120, ge=1, le=300)
     max_agent_calls: int = Field(default=6, ge=1, le=20)
     investigation_workflow: Literal["direct", "langgraph"] = "direct"

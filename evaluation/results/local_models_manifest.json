@@ -1,0 +1,56 @@
+{
+  "date": "2026-10-04",
+  "repository": "https://github.com/pallets/click",
+  "repository_commit": "fd183b2ced1cb5857784fe7fb22f4982f671f098",
+  "dataset": "evaluation/click_8_2_1_issues.jsonl",
+  "dataset_role": "manually selected development set, 5 cases",
+  "python": "3.12.14",
+  "packages": {
+    "torch": "2.6.0+cpu",
+    "sentence-transformers": "5.1.2",
+    "transformers": "4.57.6",
+    "huggingface-hub": "0.36.2",
+    "langgraph": "1.2.12",
+    "fastapi": "0.142.2",
+    "numpy": "2.5.3"
+  },
+  "embedding": {
+    "model": "sentence-transformers/all-MiniLM-L6-v2",
+    "revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+    "device": "cpu",
+    "dimensions": 384
+  },
+  "reranker": {
+    "model": "cross-encoder/ms-marco-MiniLM-L6-v2",
+    "revision": "233902d25c440f23af6f7d6e94d2946bac0bee0a",
+    "device": "cpu",
+    "candidate_chunks": 20,
+    "first_stage": "hybrid"
+  },
+  "llm": {
+    "model": "Qwen/Qwen3-4B-GGUF",
+    "revision": "bc640142c66e1fdd12af0bd68f40445458f3869b",
+    "file": "Qwen3-4B-Q4_K_M.gguf",
+    "sha256": "7485fe6f11af29433bc51cab58009521f205840f5b4ae3a32fa7f92e8534fdf5",
+    "temperature": 0,
+    "max_output_tokens": 1536
+  },
+  "server": {
+    "project": "ggml-org/llama.cpp",
+    "release": "b11382",
+    "commit": "11fe02151",
+    "backend": "Vulkan",
+    "context_tokens": 16384,
+    "slots": 1,
+    "thinking": false,
+    "hardware": "NVIDIA RTX 3080 Ti 12 GB"
+  },
+  "agent": {
+    "workflow": "langgraph",
+    "initial_retrieval": "bm25",
+    "initial_chunks": 5,
+    "max_tool_calls": 6,
+    "first_turn_policy": "required read_file; subsequent turns auto"
+  },
+  "timing_note": "Single sequential run with a loaded model, includes in-process FastAPI + LangGraph and localhost LLM calls; not a concurrency or cold-start benchmark."
+}

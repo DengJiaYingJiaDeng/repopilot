@@ -1,0 +1,382 @@
+[
+  {
+    "method": "keyword",
+    "top_k": 3,
+    "case_count": 5,
+    "mean_recall_at_k": 0.4,
+    "mrr_at_k": 0.36666666666666664,
+    "cases": [
+      {
+        "issue_id": "pallets/click#3019",
+        "recall_at_k": 0.0,
+        "reciprocal_rank": 0.0,
+        "predicted_files": [
+          "src/click/core.py",
+          "src/click/types.py",
+          "src/click/decorators.py"
+        ],
+        "relevant_files": [
+          "src/click/termui.py"
+        ]
+      },
+      {
+        "issue_id": "pallets/click#2952",
+        "recall_at_k": 0.5,
+        "reciprocal_rank": 0.5,
+        "predicted_files": [
+          "tests/test_options.py",
+          "src/click/core.py",
+          "src/click/shell_completion.py"
+        ],
+        "relevant_files": [
+          "src/click/core.py",
+          "src/click/types.py"
+        ]
+      },
+      {
+        "issue_id": "pallets/click#2836",
+        "recall_at_k": 0.5,
+        "reciprocal_rank": 0.3333333333333333,
+        "predicted_files": [
+          "tests/test_termui.py",
+          "tests/test_options.py",
+          "src/click/core.py"
+        ],
+        "relevant_files": [
+          "src/click/core.py",
+          "src/click/termui.py"
+        ]
+      },
+      {
+        "issue_id": "pallets/click#3015",
+        "recall_at_k": 0.0,
+        "reciprocal_rank": 0.0,
+        "predicted_files": [
+          "src/click/shell_completion.py",
+          "tests/test_shell_completion.py",
+          "src/click/core.py"
+        ],
+        "relevant_files": [
+          "src/click/types.py"
+        ]
+      },
+      {
+        "issue_id": "pallets/click#3043",
+        "recall_at_k": 1.0,
+        "reciprocal_rank": 1.0,
+        "predicted_files": [
+          "src/click/shell_completion.py",
+          "tests/test_shell_completion.py",
+          "tests/test_arguments.py"
+        ],
+        "relevant_files": [
+          "src/click/shell_completion.py"
+        ]
+      }
+    ]
+  },
+  {
+    "method": "bm25",
+    "top_k": 3,
+    "case_count": 5,
+    "mean_recall_at_k": 0.9,
+    "mrr_at_k": 0.8,
+    "cases": [
+      {
+        "issue_id": "pallets/click#3019",
+        "recall_at_k": 1.0,
+        "reciprocal_rank": 1.0,
+        "predicted_files": [
+          "src/click/termui.py",
+          "src/click/core.py",
+          "tests/test_utils.py"
+        ],
+        "relevant_files": [
+          "src/click/termui.py"
+        ]
+      },
+      {
+        "issue_id": "pallets/click#2952",
+        "recall_at_k": 0.5,
+        "reciprocal_rank": 0.5,
+        "predicted_files": [
+          "tests/test_options.py",
+          "src/click/core.py",
+          "docs/options.md"
+        ],
+        "relevant_files": [
+          "src/click/core.py",
+          "src/click/types.py"
+        ]
+      },
+      {
+        "issue_id": "pallets/click#2836",
+        "recall_at_k": 1.0,
+        "reciprocal_rank": 0.5,
+        "predicted_files": [
+          "tests/test_termui.py",
+          "src/click/core.py",
+          "src/click/termui.py"
+        ],
+        "relevant_files": [
+          "src/click/core.py",
+          "src/click/termui.py"
+        ]
+      },
+      {
+        "issue_id": "pallets/click#3015",
+        "recall_at_k": 1.0,
+        "reciprocal_rank": 1.0,
+        "predicted_files": [
+          "src/click/types.py",
+          "src/click/shell_completion.py",
+          "tests/test_basic.py"
+        ],
+        "relevant_files": [
+          "src/click/types.py"
+        ]
+      },
+      {
+        "issue_id": "pallets/click#3043",
+        "recall_at_k": 1.0,
+        "reciprocal_rank": 1.0,
+        "predicted_files": [
+          "src/click/shell_completion.py",
+          "src/click/core.py",
+          "examples/completion/completion.py"
+        ],
+        "relevant_files": [
+          "src/click/shell_completion.py"
+        ]
+      }
+    ]
+  },
+  {
+    "method": "vector",
+    "top_k": 3,
+    "case_count": 5,
+    "mean_recall_at_k": 0.8,
+    "mrr_at_k": 0.5,
+    "cases": [
+      {
+        "issue_id": "pallets/click#3019",
+        "recall_at_k": 1.0,
+        "reciprocal_rank": 0.5,
+        "predicted_files": [
+          "tests/test_utils.py",
+          "src/click/termui.py",
+          "tests/test_termui.py"
+        ],
+        "relevant_files": [
+          "src/click/termui.py"
+        ]
+      },
+      {
+        "issue_id": "pallets/click#2952",
+        "recall_at_k": 0.5,
+        "reciprocal_rank": 0.3333333333333333,
+        "predicted_files": [
+          "tests/test_options.py",
+          "tests/test_basic.py",
+          "src/click/core.py"
+        ],
+        "relevant_files": [
+          "src/click/core.py",
+          "src/click/types.py"
+        ]
+      },
+      {
+        "issue_id": "pallets/click#2836",
+        "recall_at_k": 0.5,
+        "reciprocal_rank": 0.3333333333333333,
+        "predicted_files": [
+          "tests/test_options.py",
+          "tests/test_termui.py",
+          "src/click/termui.py"
+        ],
+        "relevant_files": [
+          "src/click/core.py",
+          "src/click/termui.py"
+        ]
+      },
+      {
+        "issue_id": "pallets/click#3015",
+        "recall_at_k": 1.0,
+        "reciprocal_rank": 0.3333333333333333,
+        "predicted_files": [
+          "src/click/shell_completion.py",
+          "tests/test_shell_completion.py",
+          "src/click/types.py"
+        ],
+        "relevant_files": [
+          "src/click/types.py"
+        ]
+      },
+      {
+        "issue_id": "pallets/click#3043",
+        "recall_at_k": 1.0,
+        "reciprocal_rank": 1.0,
+        "predicted_files": [
+          "src/click/shell_completion.py",
+          "src/click/core.py",
+          "tests/test_shell_completion.py"
+        ],
+        "relevant_files": [
+          "src/click/shell_completion.py"
+        ]
+      }
+    ]
+  },
+  {
+    "method": "hybrid",
+    "top_k": 3,
+    "case_count": 5,
+    "mean_recall_at_k": 0.8,
+    "mrr_at_k": 0.7666666666666667,
+    "cases": [
+      {
+        "issue_id": "pallets/click#3019",
+        "recall_at_k": 1.0,
+        "reciprocal_rank": 1.0,
+        "predicted_files": [
+          "src/click/termui.py",
+          "tests/test_utils.py",
+          "src/click/core.py"
+        ],
+        "relevant_files": [
+          "src/click/termui.py"
+        ]
+      },
+      {
+        "issue_id": "pallets/click#2952",
+        "recall_at_k": 0.5,
+        "reciprocal_rank": 0.5,
+        "predicted_files": [
+          "tests/test_options.py",
+          "src/click/core.py",
+          "tests/test_basic.py"
+        ],
+        "relevant_files": [
+          "src/click/core.py",
+          "src/click/types.py"
+        ]
+      },
+      {
+        "issue_id": "pallets/click#2836",
+        "recall_at_k": 0.5,
+        "reciprocal_rank": 0.3333333333333333,
+        "predicted_files": [
+          "tests/test_termui.py",
+          "tests/test_options.py",
+          "src/click/core.py"
+        ],
+        "relevant_files": [
+          "src/click/core.py",
+          "src/click/termui.py"
+        ]
+      },
+      {
+        "issue_id": "pallets/click#3015",
+        "recall_at_k": 1.0,
+        "reciprocal_rank": 1.0,
+        "predicted_files": [
+          "src/click/types.py",
+          "tests/test_shell_completion.py",
+          "src/click/shell_completion.py"
+        ],
+        "relevant_files": [
+          "src/click/types.py"
+        ]
+      },
+      {
+        "issue_id": "pallets/click#3043",
+        "recall_at_k": 1.0,
+        "reciprocal_rank": 1.0,
+        "predicted_files": [
+          "src/click/shell_completion.py",
+          "src/click/core.py",
+          "src/click/types.py"
+        ],
+        "relevant_files": [
+          "src/click/shell_completion.py"
+        ]
+      }
+    ]
+  },
+  {
+    "method": "rerank",
+    "top_k": 3,
+    "case_count": 5,
+    "mean_recall_at_k": 0.8,
+    "mrr_at_k": 0.9,
+    "cases": [
+      {
+        "issue_id": "pallets/click#3019",
+        "recall_at_k": 1.0,
+        "reciprocal_rank": 1.0,
+        "predicted_files": [
+          "src/click/termui.py",
+          "tests/test_termui.py",
+          "src/click/core.py"
+        ],
+        "relevant_files": [
+          "src/click/termui.py"
+        ]
+      },
+      {
+        "issue_id": "pallets/click#2952",
+        "recall_at_k": 0.5,
+        "reciprocal_rank": 1.0,
+        "predicted_files": [
+          "src/click/core.py",
+          "docs/options.md",
+          "tests/test_options.py"
+        ],
+        "relevant_files": [
+          "src/click/core.py",
+          "src/click/types.py"
+        ]
+      },
+      {
+        "issue_id": "pallets/click#2836",
+        "recall_at_k": 0.5,
+        "reciprocal_rank": 1.0,
+        "predicted_files": [
+          "src/click/core.py",
+          "tests/test_options.py",
+          "tests/test_termui.py"
+        ],
+        "relevant_files": [
+          "src/click/core.py",
+          "src/click/termui.py"
+        ]
+      },
+      {
+        "issue_id": "pallets/click#3015",
+        "recall_at_k": 1.0,
+        "reciprocal_rank": 0.5,
+        "predicted_files": [
+          "examples/completion/completion.py",
+          "src/click/types.py",
+          "src/click/core.py"
+        ],
+        "relevant_files": [
+          "src/click/types.py"
+        ]
+      },
+      {
+        "issue_id": "pallets/click#3043",
+        "recall_at_k": 1.0,
+        "reciprocal_rank": 1.0,
+        "predicted_files": [
+          "src/click/shell_completion.py",
+          "examples/completion/completion.py",
+          "src/click/core.py"
+        ],
+        "relevant_files": [
+          "src/click/shell_completion.py"
+        ]
+      }
+    ]
+  }
+]

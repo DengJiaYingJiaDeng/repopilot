@@ -1,0 +1,5 @@
+# Tested local retrieval stack. Install CPU torch first; see docs/LOCAL_MODELS.md.
+torch==2.6.0
+sentence-transformers==5.1.2
+transformers==4.57.6
+huggingface-hub==0.36.2

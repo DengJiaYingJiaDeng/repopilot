@@ -47,3 +47,7 @@ class RepositoryError(Exception):
 
 class IndexNotReadyError(Exception):
     """Search was requested before indexing a repository."""
+
+
+class ModelProviderError(Exception):
+    """A configured model backend failed to return a usable response."""

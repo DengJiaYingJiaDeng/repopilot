@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "repopilot"
-version = "0.6.0"
+version = "0.7.0"
 description = "Repository retrieval and bounded issue investigation"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -17,7 +17,7 @@ dependencies = [
 
 [project.optional-dependencies]
 openai = ["openai>=1.0,<3", "httpx[socks]>=0.27,<1"]
-local = ["sentence-transformers>=3,<6"]
+local = ["sentence-transformers>=5.1,<6", "transformers>=4.51,<5"]
 mcp = ["mcp>=2,<3"]
 graph = ["langgraph>=1,<2"]
 dev = [

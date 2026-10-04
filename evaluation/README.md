@@ -23,3 +23,16 @@ python -m repopilot.evaluation /tmp/repopilot-click-8.2.1 evaluation/click_8_2_1
 ```
 
 The evaluator reports file-level Recall@K and MRR@K. The data are public but tiny and manually selected, so these values are descriptive of these five cases only. Since this repository evolves, always verify the checkout SHA before comparing results.
+
+## Measured local models
+
+[The live model report](LOCAL_MODEL_REPORT.md) includes all five retrieval methods, the local Agent run, failure analysis, and exact model revisions. Raw ranking output is in `results/click_retrieval_local.json`. The cross-encoder reranks **20 chunks** from the hybrid retriever; file-level deduplication occurs after ranking. The candidate cap can exclude relevant files, so reranking is not guaranteed to increase Recall@K.
+
+For a live investigation run (requires the local server plus `.[dev]`):
+
+```bash
+python scripts/evaluate_local_agent.py /tmp/repopilot-click-8.2.1 \
+  evaluation/click_8_2_1_issues.jsonl --output /tmp/click-agent-local.json
+```
+
+This exercises indexing and investigation through FastAPI's in-process HTTP client and the real LangGraph workflow, with actual localhost requests to Qwen. It records latency and tool traces without claiming automated root-cause grading. The 5 cases also informed prompt/runtime fixes; they are not a held-out evaluation.

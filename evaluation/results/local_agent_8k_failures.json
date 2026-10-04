@@ -1,0 +1,35 @@
+{
+  "configuration": "8K context, required read_file, before explicit first-turn instruction",
+  "cases": [
+    {
+      "issue_id": "pallets/click#3019",
+      "status": "incomplete",
+      "tool_calls": 3,
+      "limitation": "Local model server returned HTTP 400"
+    },
+    {
+      "issue_id": "pallets/click#2952",
+      "status": "incomplete",
+      "tool_calls": 0,
+      "limitation": "Local model reached its output token limit"
+    },
+    {
+      "issue_id": "pallets/click#2836",
+      "status": "complete",
+      "tool_calls": 2,
+      "limitation": null
+    },
+    {
+      "issue_id": "pallets/click#3015",
+      "status": "incomplete",
+      "tool_calls": 0,
+      "limitation": "Local model reached its output token limit"
+    },
+    {
+      "issue_id": "pallets/click#3043",
+      "status": "complete",
+      "tool_calls": 1,
+      "limitation": null
+    }
+  ]
+}

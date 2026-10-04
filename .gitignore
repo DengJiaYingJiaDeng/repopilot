@@ -9,3 +9,8 @@ htmlcov/
 dist/
 build/
 .env
+
+# Keep downloaded models and machine-specific caches out of Git.
+*.gguf
+models/
+.local/
