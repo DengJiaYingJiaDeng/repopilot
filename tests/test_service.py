@@ -1,0 +1,16 @@
+from pathlib import Path
+
+from repopilot.config import Settings
+from repopilot.service import RepoPilotService
+
+
+def test_index_skips_invalid_python_and_accepts_uppercase_suffix(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / "valid.PY").write_text("def useful_function():\n    return 1\n")
+    (repo / "invalid.py").write_text("def broken(:\n")
+    service = RepoPilotService(Settings(allowed_root=tmp_path))
+    summary = service.index(repo)
+    assert summary.files_indexed == 1
+    assert any("invalid.py: SyntaxError" in item for item in summary.skipped_files)
+    assert service.search("useful function", 1)[0].chunk.symbol_name == "useful_function"
