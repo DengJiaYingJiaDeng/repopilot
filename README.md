@@ -101,6 +101,8 @@ If PyPI is slow in your region, pass `--build-arg PIP_INDEX_URL=<your trusted pa
 - **v0.6:** expose selected search tools through MCP.
 - **v1.0:** a measured, documented repository analysis system, contingent on evaluation results.
 
+For current baseline observations and the next milestone checklist, see [Development log](docs/DEVELOPMENT_LOG.md).
+
 ## Project status
 
 This is a learning and portfolio project. Keyword scores indicate textual overlap, not correctness. Python syntax errors are reported as skipped files. The current index is ephemeral and scoped to one repository per server process. No LLM, embedding, BM25, reranker, database, frontend, or autonomous agent has been implemented.

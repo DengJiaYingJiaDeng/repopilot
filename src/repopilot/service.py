@@ -19,7 +19,7 @@ class RepoPilotService:
     def __init__(self, settings: Settings, retriever: Retriever | None = None) -> None:
         self.settings = settings
         self.retriever = retriever or KeywordRetriever()
-        self._chunks: list[CodeChunk] | None = None
+        self._indexed = False
 
     def index(self, path: Path) -> IndexSummary:
         scan = scan_repository(path, self.settings.allowed_root, self.settings.max_file_bytes)
@@ -38,7 +38,8 @@ class RepoPilotService:
                 continue
             chunks.extend(parsed)
             indexed += 1
-        self._chunks = chunks
+        self.retriever.index(chunks)
+        self._indexed = True
         return IndexSummary(
             repository=scan.repository,
             files_indexed=indexed,
@@ -47,9 +48,9 @@ class RepoPilotService:
         )
 
     def search(self, query: str, top_k: int) -> list[ScoredChunk]:
-        if self._chunks is None:
+        if not self._indexed:
             raise IndexNotReadyError("Index a repository before searching")
-        return self.retriever.search(query, self._chunks, top_k)
+        return self.retriever.search(query, top_k)
 
     def analyze(self, issue_text: str, top_k: int) -> AnalysisResult:
         matches = self.search(issue_text, top_k)

@@ -16,6 +16,8 @@ def test_symbol_terms_outweigh_incidental_content() -> None:
         ),
         "sample",
     )
-    matches = KeywordRetriever().search("environment config", chunks, 2)
+    retriever = KeywordRetriever()
+    retriever.index(chunks)
+    matches = retriever.search("environment config", 2)
     assert matches[0].chunk.symbol_name == "load_environment_config"
     assert matches[0].score > matches[1].score
