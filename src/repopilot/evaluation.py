@@ -88,6 +88,13 @@ def evaluate(
     """Evaluate file rankings using the same indexed repository for every case."""
     if not cases:
         raise ValueError("Evaluation dataset is empty")
+    indexed_files = service.indexed_files
+    for case in cases:
+        missing = set(case.relevant_files) - indexed_files
+        if missing:
+            raise ValueError(
+                f"Case {case.issue_id} labels files absent from the index: {sorted(missing)}"
+            )
     scores = []
     for case in cases:
         # Ask for all matching chunks so duplicate symbols do not consume file-level K.
@@ -116,7 +123,10 @@ def main() -> None:
     parser.add_argument("dataset", type=Path, help="Curated JSONL issue cases")
     parser.add_argument("--top-k", type=int, default=5)
     parser.add_argument(
-        "--methods", nargs="+", choices=["keyword", "bm25"], default=["keyword", "bm25"]
+        "--methods",
+        nargs="+",
+        choices=["keyword", "bm25", "vector", "hybrid", "rerank"],
+        default=["keyword", "bm25"],
     )
     args = parser.parse_args()
     if args.top_k <= 0:

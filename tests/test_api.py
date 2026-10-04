@@ -37,3 +37,42 @@ def test_api_rejects_repository_outside_boundary(tmp_path: Path) -> None:
     client = TestClient(create_app(Settings(allowed_root=tmp_path)))
     response = client.post("/repositories/index", json={"path": str(FIXTURE)})
     assert response.status_code == 400
+
+
+def test_investigate_api_with_fake_model() -> None:
+    import json
+
+    from pydantic import SecretStr
+
+    from repopilot.agent import ModelTurn
+
+    class FinalModel:
+        def next_turn(
+            self,
+            initial_prompt: str | None,
+            previous_response_id: str | None,
+            tool_outputs: list[dict[str, str]],
+        ) -> ModelTurn:
+            answer = {
+                "root_cause_hypothesis": "The environment setting may not load.",
+                "investigation_steps": ["Inspect config.py"],
+                "test_plan": ["Test missing environment variable"],
+                "evidence_files": ["config.py"],
+            }
+            return ModelTurn("1", [], json.dumps(answer))
+
+    app = create_app(
+        Settings(
+            allowed_root=FIXTURE.parent,
+            investigation_model="test-model",
+            openai_api_key=SecretStr("test-key"),
+            investigation_workflow="langgraph",
+        )
+    )
+    app.state.investigator.model = FinalModel()
+    client = TestClient(app)
+    assert client.post("/repositories/index", json={"path": str(FIXTURE)}).status_code == 200
+    response = client.post("/investigate", json={"issue_text": "environment config failure"})
+    assert response.status_code == 200
+    assert response.json()["status"] == "complete"
+    assert response.json()["evidence_files"] == ["config.py"]

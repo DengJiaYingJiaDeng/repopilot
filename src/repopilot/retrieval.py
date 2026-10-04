@@ -7,6 +7,7 @@ from collections import Counter
 from collections.abc import Sequence
 
 from repopilot.domain import CodeChunk, ScoredChunk
+from repopilot.embeddings import Embedder
 
 TOKEN = re.compile(r"[a-z0-9]+")
 CAMEL_BOUNDARY = re.compile(r"(?<=[a-z0-9])(?=[A-Z])")
@@ -106,5 +107,79 @@ class BM25Retriever(Retriever):
                 score += idf * count * (self.k1 + 1) / (count + norm)
             if score > 0:
                 results.append(ScoredChunk(chunk=chunk, score=score))
+        results.sort(key=lambda item: (-item.score, item.chunk.file_path, item.chunk.start_line))
+        return results[:top_k]
+
+
+def cosine_similarity(left: list[float], right: list[float]) -> float:
+    if len(left) != len(right) or not left:
+        raise ValueError("Embedding vectors must have the same nonzero dimension")
+    left_norm = math.sqrt(sum(value * value for value in left))
+    right_norm = math.sqrt(sum(value * value for value in right))
+    if left_norm == 0 or right_norm == 0:
+        return 0.0
+    return sum(a * b for a, b in zip(left, right, strict=True)) / (left_norm * right_norm)
+
+
+class VectorRetriever(Retriever):
+    """In-memory cosine search using an injected embedding provider."""
+
+    def __init__(self, embedder: "Embedder") -> None:
+        self.embedder = embedder
+        self._chunks: tuple[CodeChunk, ...] = ()
+        self._vectors: list[list[float]] = []
+
+    def index(self, chunks: Sequence[CodeChunk]) -> None:
+        corpus = tuple(chunks)
+        texts = [
+            f"{chunk.file_path} {chunk.symbol_name or ''}\n{chunk.content[:4000]}"
+            for chunk in corpus
+        ]
+        vectors = self.embedder.embed(texts)
+        if len(vectors) != len(corpus):
+            raise ValueError("Embedding provider returned the wrong number of vectors")
+        if vectors and (not vectors[0] or any(len(row) != len(vectors[0]) for row in vectors)):
+            raise ValueError("Embedding vectors must have a consistent nonzero dimension")
+        self._chunks, self._vectors = corpus, vectors
+
+    def search(self, query: str, top_k: int) -> list[ScoredChunk]:
+        if not query.strip() or top_k <= 0 or not self._chunks:
+            return []
+        queries = self.embedder.embed([query])
+        if len(queries) != 1:
+            raise ValueError("Embedding provider must return one query vector")
+        results = [
+            ScoredChunk(chunk=chunk, score=cosine_similarity(queries[0], vector))
+            for chunk, vector in zip(self._chunks, self._vectors, strict=True)
+        ]
+        results.sort(key=lambda item: (-item.score, item.chunk.file_path, item.chunk.start_line))
+        return results[:top_k]
+
+
+class HybridRetriever(Retriever):
+    """Fuse BM25 and vector ranks with reciprocal rank fusion."""
+
+    def __init__(self, lexical: Retriever, dense: Retriever, rank_constant: int = 60) -> None:
+        if rank_constant <= 0:
+            raise ValueError("rank_constant must be positive")
+        self.lexical, self.dense, self.rank_constant = lexical, dense, rank_constant
+        self._size = 0
+
+    def index(self, chunks: Sequence[CodeChunk]) -> None:
+        self.lexical.index(chunks)
+        self.dense.index(chunks)
+        self._size = len(chunks)
+
+    def search(self, query: str, top_k: int) -> list[ScoredChunk]:
+        if not query.strip() or top_k <= 0:
+            return []
+        scores: dict[str, float] = {}
+        found: dict[str, CodeChunk] = {}
+        for retriever in (self.lexical, self.dense):
+            for rank, item in enumerate(retriever.search(query, self._size), 1):
+                chunk = item.chunk
+                found[chunk.id] = chunk
+                scores[chunk.id] = scores.get(chunk.id, 0.0) + 1 / (self.rank_constant + rank)
+        results = [ScoredChunk(chunk=found[key], score=score) for key, score in scores.items()]
         results.sort(key=lambda item: (-item.score, item.chunk.file_path, item.chunk.start_line))
         return results[:top_k]
