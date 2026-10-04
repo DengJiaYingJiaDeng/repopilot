@@ -41,4 +41,5 @@ def test_graph_routes_incomplete_result_for_review(tmp_path: Path) -> None:
     graph = build_investigation_graph(Investigator(service, FinalModel(good)))
     state = graph.invoke({"issue_text": "config failed", "method": "bm25"})
     assert state["result"].status == "complete"
-    assert "review_required" not in state
+    assert state["review_required"] is True
+    assert state["result"].evidence_status == "insufficient"

@@ -1,0 +1,354 @@
+{
+  "schema_version": 1,
+  "source_commit": "43bf904966bf1b52af139bde32481d42607d42fb",
+  "source_digest": "2b7e87214ef8a204e395a3edfd0b5f46951d5b4ebbd3c0f261b34dec7c6a8fd2",
+  "dataset_sha256": "476fa9877005bfddf1508b64a48f37e59f16df0283a57b55b895d1ff3957a161",
+  "model": "qwen3-4b",
+  "settings": {
+    "method": "bm25",
+    "max_agent_calls": 6,
+    "response_language": "en"
+  },
+  "scope": "Manually curated development cases. No independent accuracy estimate.",
+  "records": [
+    {
+      "issue_id": "pallets/click#3019",
+      "repository": "pallets/click",
+      "revision": "fd183b2ced1cb5857784fe7fb22f4982f671f098",
+      "elapsed_seconds": 20.774,
+      "initial_recall_at_3": 1.0,
+      "cited_recall_at_3": 1.0,
+      "result": {
+        "citations": [
+          {
+            "file_path": "src/click/termui.py",
+            "start_line": 227,
+            "end_line": 227,
+            "reason": "The prompt is constructed using the provided `prompt_suffix`, which is not stripped or checked for empty string. When `prompt_suffix=''`, the suffix is still appended to the prompt, leading to an unintended suffix being displayed.",
+            "verified": true,
+            "problems": []
+          },
+          {
+            "file_path": "src/click/termui.py",
+            "start_line": 227,
+            "end_line": 227,
+            "reason": "The `_build_prompt` function (not shown) likely appends the `prompt_suffix` as-is, including empty strings, which contradicts the expectation that an empty suffix should not be rendered.",
+            "verified": true,
+            "problems": []
+          }
+        ],
+        "uncertainties": [
+          "The exact behavior of `_build_prompt` when `prompt_suffix` is empty is not explicitly defined in the provided code.",
+          "The code does not handle the case where `prompt_suffix` is an empty string, leading to inconsistent rendering."
+        ],
+        "evidence_status": "insufficient",
+        "evidence_checks": [
+          "uncited_evidence_file"
+        ],
+        "successful_reads": 2,
+        "issue_text": "click.prompt and click.confirm ignore an empty prompt_suffix. Supplying prompt_suffix='' still renders a suffix instead of no suffix.",
+        "status": "complete",
+        "root_cause_hypothesis": "The `prompt_suffix` is not validated or stripped when empty, causing it to be appended as part of the prompt, even when explicitly set to an empty string.",
+        "investigation_steps": [
+          "Verify that `_build_prompt` appends the `prompt_suffix` as-is, including empty strings.",
+          "Confirm that the `confirm` function does not explicitly check for empty `prompt_suffix` before appending."
+        ],
+        "test_plan": [
+          "Pass `prompt_suffix=''` to `click.confirm` and verify that no suffix is displayed.",
+          "Pass `prompt_suffix=' '` (a space) and ensure the suffix is rendered as expected."
+        ],
+        "evidence_files": [
+          "src/click/termui.py",
+          "src/click/core.py"
+        ],
+        "tool_trace": [
+          {
+            "name": "read_file",
+            "arguments": {
+              "path": "src/click/termui.py",
+              "start_line": 194,
+              "end_line": 252
+            },
+            "output_characters": 2608,
+            "returned_error": false,
+            "observed_ranges": [
+              {
+                "file_path": "src/click/termui.py",
+                "start_line": 194,
+                "end_line": 252
+              }
+            ]
+          },
+          {
+            "name": "find_callers",
+            "arguments": {
+              "name": "confirm"
+            },
+            "output_characters": 2765,
+            "returned_error": false,
+            "observed_ranges": [
+              {
+                "file_path": "src/click/core.py",
+                "start_line": 2939,
+                "end_line": 2945
+              },
+              {
+                "file_path": "tests/test_utils.py",
+                "start_line": 118,
+                "end_line": 124
+              },
+              {
+                "file_path": "tests/test_utils.py",
+                "start_line": 137,
+                "end_line": 143
+              },
+              {
+                "file_path": "tests/test_utils.py",
+                "start_line": 437,
+                "end_line": 443
+              },
+              {
+                "file_path": "tests/test_utils.py",
+                "start_line": 443,
+                "end_line": 449
+              }
+            ]
+          },
+          {
+            "name": "read_file",
+            "arguments": {
+              "path": "src/click/core.py",
+              "start_line": 2939,
+              "end_line": 2945
+            },
+            "output_characters": 536,
+            "returned_error": false,
+            "observed_ranges": [
+              {
+                "file_path": "src/click/core.py",
+                "start_line": 2939,
+                "end_line": 2945
+              }
+            ]
+          }
+        ],
+        "limitation": null,
+        "review_required": true,
+        "original_output_text": null,
+        "translation_note": null,
+        "draft_output_text": "{\n  \"root_cause_hypothesis\": \"The issue arises because the `confirm` function in Click's termui.py uses the `prompt_suffix` parameter to append a suffix to the prompt, but it does not properly handle the case when `prompt_suffix` is an empty string. This leads to the suffix being displayed even when it should not be.\",\n  \"investigation_steps\": [\n    \"Verify the behavior of the `confirm` function when `prompt_suffix` is an empty string.\",\n    \"Check the `_build_prompt` function to see how it handles the `prompt_suffix` parameter.\",\n    \"Inspect the `visible_prompt_func` and `echo` functions to ensure they do not alter the prompt in a way that overrides the `prompt_suffix` parameter.\"\n  ],\n  \"test_plan\": [\n    \"Run tests that explicitly set `prompt_suffix` to an empty string and check if the suffix is still displayed.\",\n    \"Modify the `confirm` function to log or debug the `prompt_suffix` value during execution to confirm its value in different scenarios.\",\n    \"Test the `confirm` function with various values of `prompt_suffix`, including empty strings, to ensure consistent behavior.\"\n  ],\n  \"evidence_files\": [\n    {\n      \"file_path\": \"src/click/termui.py\",\n      \"start_line\": 194,\n      \"end_line\": 252,\n      \"reason\": \"This file contains the implementation of the `confirm` function, which is responsible for handling the prompt and suffix logic.\"\n    },\n    {\n      \"file_path\": \"src/click/core.py\",\n      \"start_line\": 2939,\n      \"end_line\": 2945,\n      \"reason\": \"This file contains the caller of the `confirm` function, which uses the `prompt_suffix` parameter to pass the suffix to the `confirm` function.\"\n    }\n  ],\n  \"uncertainties\": [\n    \"The exact behavior of the `visible_prompt_func` and `echo` functions in handling empty `prompt_suffix` values is not fully clear from the code.\"\n  ]\n}",
+        "synthesis_note": "已基于实际源码读取整理报告；初稿已保留，根因仍需验证。"
+      }
+    },
+    {
+      "issue_id": "pallets/click#3015",
+      "repository": "pallets/click",
+      "revision": "fd183b2ced1cb5857784fe7fb22f4982f671f098",
+      "elapsed_seconds": 35.466,
+      "initial_recall_at_3": 1.0,
+      "cited_recall_at_3": 0.0,
+      "result": {
+        "citations": [],
+        "uncertainties": [],
+        "evidence_status": "unchecked",
+        "evidence_checks": [],
+        "successful_reads": 0,
+        "issue_text": "Choice shell autocomplete returns the wrong value for enum choices; the completion result cannot be passed back as the chosen enum.",
+        "status": "incomplete",
+        "root_cause_hypothesis": null,
+        "investigation_steps": [],
+        "test_plan": [],
+        "evidence_files": [],
+        "tool_trace": [
+          {
+            "name": "read_file",
+            "arguments": {
+              "path": "src/click/types.py",
+              "start_line": 377,
+              "end_line": 398
+            },
+            "output_characters": 1112,
+            "returned_error": false,
+            "observed_ranges": [
+              {
+                "file_path": "src/click/types.py",
+                "start_line": 377,
+                "end_line": 398
+              }
+            ]
+          },
+          {
+            "name": "find_callers",
+            "arguments": {
+              "name": "Choice.shell_complete"
+            },
+            "output_characters": 2341,
+            "returned_error": false,
+            "observed_ranges": [
+              {
+                "file_path": "src/click/core.py",
+                "start_line": 1434,
+                "end_line": 1440
+              },
+              {
+                "file_path": "src/click/core.py",
+                "start_line": 1904,
+                "end_line": 1910
+              },
+              {
+                "file_path": "src/click/core.py",
+                "start_line": 2459,
+                "end_line": 2465
+              },
+              {
+                "file_path": "src/click/shell_completion.py",
+                "start_line": 272,
+                "end_line": 278
+              }
+            ]
+          },
+          {
+            "name": "read_file",
+            "arguments": {
+              "path": "src/click/core.py",
+              "start_line": 2459,
+              "end_line": 2465
+            },
+            "output_characters": 356,
+            "returned_error": false,
+            "observed_ranges": [
+              {
+                "file_path": "src/click/core.py",
+                "start_line": 2459,
+                "end_line": 2465
+              }
+            ]
+          }
+        ],
+        "limitation": "Model cited a file absent from observed evidence",
+        "review_required": true,
+        "original_output_text": null,
+        "translation_note": null,
+        "draft_output_text": null,
+        "synthesis_note": null
+      }
+    },
+    {
+      "issue_id": "psf/requests#PR7309",
+      "repository": "psf/requests",
+      "revision": "7407309c8a8a73aa2f4337184025d440bbedab7a",
+      "elapsed_seconds": 22.296,
+      "initial_recall_at_3": 1.0,
+      "cited_recall_at_3": 1.0,
+      "result": {
+        "citations": [
+          {
+            "file_path": "src/requests/utils.py",
+            "start_line": 544,
+            "end_line": 544,
+            "reason": "params[\"charset\"] is a bool instead of a string, causing AttributeError: bool object has no attribute 'strip'",
+            "verified": true,
+            "problems": []
+          },
+          {
+            "file_path": "src/requests/utils.py",
+            "start_line": 541,
+            "end_line": 541,
+            "reason": "The _parse_content_type_header function is not correctly parsing the Content-Type header, leading to 'charset' being a boolean instead of a string",
+            "verified": true,
+            "problems": []
+          }
+        ],
+        "uncertainties": [
+          "The exact cause of the _parse_content_type_header function returning a boolean for 'charset' is not established",
+          "The behavior of the _parse_content_type_header function when parsing 'charset' without a value (e.g., 'charset') is not documented"
+        ],
+        "evidence_status": "verified",
+        "evidence_checks": [],
+        "successful_reads": 2,
+        "issue_text": "get_encoding_from_headers fails with AttributeError: bool object has no attribute strip for Content-Type: text/html; charset. Expected behavior is the ordinary text fallback encoding when charset has no value.",
+        "status": "complete",
+        "root_cause_hypothesis": "The _parse_content_type_header function is incorrectly interpreting the 'charset' parameter as a boolean when it should be a string, leading to the AttributeError when 'charset' is present but not properly parsed as a string value.",
+        "investigation_steps": [
+          "Verify the output of _parse_content_type_header for Content-Type: text/html; charset",
+          "Confirm that 'charset' is parsed as a string in the params dictionary",
+          "Check if the _parse_content_type_header function handles missing or invalid charset values correctly"
+        ],
+        "test_plan": [
+          "Simulate a Content-Type header with 'charset' but no value (e.g., 'text/html; charset') and verify params['charset'] is a string",
+          "Test the _parse_content_type_header function with various Content-Type headers to ensure correct parsing of 'charset' parameters"
+        ],
+        "evidence_files": [
+          "src/requests/utils.py"
+        ],
+        "tool_trace": [
+          {
+            "name": "read_file",
+            "arguments": {
+              "path": "src/requests/utils.py",
+              "start_line": 529,
+              "end_line": 551
+            },
+            "output_characters": 966,
+            "returned_error": false,
+            "observed_ranges": [
+              {
+                "file_path": "src/requests/utils.py",
+                "start_line": 529,
+                "end_line": 551
+              }
+            ]
+          },
+          {
+            "name": "find_callers",
+            "arguments": {
+              "name": "get_encoding_from_headers"
+            },
+            "output_characters": 1590,
+            "returned_error": false,
+            "observed_ranges": [
+              {
+                "file_path": "src/requests/adapters.py",
+                "start_line": 353,
+                "end_line": 359
+              },
+              {
+                "file_path": "src/requests/utils.py",
+                "start_line": 602,
+                "end_line": 608
+              },
+              {
+                "file_path": "tests/test_utils.py",
+                "start_line": 649,
+                "end_line": 655
+              }
+            ]
+          },
+          {
+            "name": "read_file",
+            "arguments": {
+              "path": "src/requests/utils.py",
+              "start_line": 529,
+              "end_line": 551
+            },
+            "output_characters": 966,
+            "returned_error": false,
+            "observed_ranges": [
+              {
+                "file_path": "src/requests/utils.py",
+                "start_line": 529,
+                "end_line": 551
+              }
+            ]
+          }
+        ],
+        "limitation": null,
+        "review_required": true,
+        "original_output_text": null,
+        "translation_note": null,
+        "draft_output_text": "{\n  \"root_cause_hypothesis\": \"The error occurs because the 'strip' method is being called on a boolean object, which does not have this attribute. This is likely due to the 'params[\\\"charset\\\"]' value being a boolean instead of a string when 'charset' is not present in the content-type parameters.\",\n  \"investigation_steps\": [\n    \"Verify the type of 'params[\\\"charset\\\"]' when 'charset' is not present in the content-type parameters.\",\n    \"Check how 'params' is populated in the '_parse_content_type_header' function to ensure it is correctly handling the content-type string.\",\n    \"Inspect the 'get_encoding_from_headers' function to confirm that 'params[\\\"charset\\\"]' is always a string when 'charset' is present.\"\n  ],\n  \"test_plan\": [\n    \"Add a type check for 'params[\\\"charset\\\"]' in 'get_encoding_from_headers' to ensure it is a string before calling 'strip' on it.\",\n    \"Modify the test cases to simulate a scenario where 'params[\\\"charset\\\"]' is a boolean and verify that the error is reproduced.\",\n    \"Update the 'get_encoding_from_headers' function to handle cases where 'params[\\\"charset\\\"]' is not a string by converting it to a string first.\"\n  ],\n  \"evidence_files\": [\n    {\n      \"file_path\": \"src/requests/utils.py\",\n      \"start_line\": 529,\n      \"end_line\": 551,\n      \"reason\": \"The 'get_encoding_from_headers' function is suspected to be the source of the error due to the 'strip' method being called on a boolean object.\"\n    },\n    {\n      \"file_path\": \"src/requests/utils.py\",\n      \"start_line\": 544,\n      \"end_line\": 544,\n      \"reason\": \"This line is where the 'strip' method is called on 'params[\\\"charset\\\"]', which is suspected to be the source of the error.\"\n    }\n  ],\n  \"uncertainties\": [\n    \"The exact cause of 'params[\\\"charset\\\"]' being a boolean is not clear and requires further inspection of the '_parse_content_type_header' function.\"\n  ]\n}",
+        "synthesis_note": "已基于实际源码读取整理报告；初稿已保留，根因仍需验证。"
+      }
+    }
+  ]
+}

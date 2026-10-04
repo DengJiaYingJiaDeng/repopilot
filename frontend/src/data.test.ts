@@ -43,3 +43,30 @@ it('keeps translated and original answers distinct on import', () => {
   expect(report.result.original_output_text).toBe(original)
   expect(report.result.translation_note).toContain('原始回答已保留')
 })
+
+it('preserves v2 evidence checks and never upgrades an old report', () => {
+  expect(parseReport(sample).result.evidence_status).toBe('unchecked')
+  const report = parseReport({
+    ...sample.result,
+    evidence_status: 'insufficient',
+    evidence_checks: ['citation_not_read'],
+    citations: [
+      {
+        file_path: 'utils.py',
+        start_line: 4,
+        end_line: 5,
+        reason: 'unverified',
+        verified: false,
+        problems: ['citation_not_read'],
+      },
+    ],
+    uncertainties: ['Caller not checked'],
+    synthesis_note: 'Report assembled from reads',
+    draft_output_text: 'old draft',
+  })
+  expect(report.result.citations[0].verified).toBe(false)
+  expect(report.result.citations[0].content).toBe('')
+  expect(report.result.evidence_checks).toEqual(['citation_not_read'])
+  expect(report.result.uncertainties).toEqual(['Caller not checked'])
+  expect(report.result.draft_output_text).toBe('old draft')
+})

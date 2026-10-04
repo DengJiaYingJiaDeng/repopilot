@@ -36,3 +36,27 @@ python scripts/evaluate_local_agent.py /tmp/repopilot-click-8.2.1 \
 ```
 
 This exercises indexing and investigation through FastAPI's in-process HTTP client and the real LangGraph workflow, with actual localhost requests to Qwen. It records latency and tool traces without claiming automated root-cause grading. The 5 cases also informed prompt/runtime fixes; they are not a held-out evaluation.
+
+## V2 paired investigation evaluation
+
+The [V2 report](V2_REPORT.md) expands investigation evaluation to **10 development cases across Click and Requests**. Every case in `investigation_cases.jsonl` includes a pinned pre-fix revision, public issue/PR provenance, source-file labels, and a source-review rubric. Labels and rubrics are never included in model requests. Some queries were paraphrased after reading the fixing PR; this dataset is explicitly not held out.
+
+Prepare snapshots without running their code:
+
+```bash
+python scripts/prepare_benchmark.py /tmp/repopilot-benchmark
+```
+
+Start the local model as documented, then run (the workbench uses port 18081):
+
+```bash
+python scripts/evaluate_investigations.py evaluation/investigation_cases.jsonl \
+  /tmp/repopilot-benchmark/checkouts.json --model-url http://127.0.0.1:18081/v1 \
+  --output /tmp/repopilot-investigations.json
+python -m repopilot.benchmark evaluation/results/v2_baseline.json \
+  evaluation/results/v2_final.json --output /tmp/repopilot-comparison.json
+```
+
+`--private-output /outside/repository/directory` optionally saves full source traces for local review. Public run artifacts omit upstream source excerpts. The runner rejects a dirty/wrong Git checkout and missing labels. The comparison rejects different datasets, model/settings, case sets, duplicate IDs, or revisions; failed cases stay in the denominator.
+
+The baseline was run before V2 code changes at commit `43bf904`. Intermediate failed runs remain in `results/v2_candidate.json` and `results/v2_draft_conditioned.json`. A `source_digest` identifies the Python source snapshot at run start, including uncommitted changes; `source_commit` alone is not the implementation identity for development runs.

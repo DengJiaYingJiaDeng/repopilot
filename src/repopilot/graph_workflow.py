@@ -18,7 +18,7 @@ class InvestigationState(TypedDict, total=False):
 
 
 def build_investigation_graph(investigator: Investigator) -> Any:
-    """Compile a graph that flags incomplete model investigations for human review."""
+    """Route incomplete or insufficiently grounded investigations for review."""
 
     def retrieve(state: InvestigationState) -> InvestigationState:
         return {
@@ -38,7 +38,11 @@ def build_investigation_graph(investigator: Investigator) -> Any:
         }
 
     def needs_review(state: InvestigationState) -> str:
-        return "review" if state["result"].status == "incomplete" else "done"
+        return (
+            "review"
+            if (state["result"].status == "incomplete" or state["result"].review_required)
+            else "done"
+        )
 
     def review(state: InvestigationState) -> InvestigationState:
         return {"review_required": True}

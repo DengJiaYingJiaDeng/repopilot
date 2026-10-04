@@ -1,6 +1,6 @@
 # Visual investigation workbench
 
-RepoPilot v0.8 adds an independent **React + TypeScript + Vite** frontend in `frontend/`. FastAPI remains the backend in `src/repopilot/api/`. They run as separate processes and communicate through HTTP; the browser never directly calls the model server.
+RepoPilot v0.9 includes an independent **React + TypeScript + Vite** frontend in `frontend/`. FastAPI remains the backend in `src/repopilot/api/`. They run as separate processes and communicate through HTTP; the browser never directly calls the model server.
 
 ```text
 Browser / React :5173
@@ -11,7 +11,7 @@ Browser / React :5173
        FastAPI :8000 → LangGraph → local Qwen :18081
 ```
 
-The default UI is Chinese. An included historical report from the public synthetic fixture provides a first look. It is clearly labeled as a historical example, with a separate manual explanation. New investigations request Chinese prose while preserving JSON keys and code identifiers. If the local model still answers in English, one additional tool-free model call produces a Chinese rendering. The original answer is retained in `original_output_text`, with an explicit `translation_note` in the UI. Evidence-file lists and array lengths must remain identical; invalid translation falls back to the original. This improves readability, not diagnosis accuracy. Imported reports preserve their original language and text.
+The default UI is Chinese. An included historical report from the public synthetic fixture provides a first look. It is clearly labeled as a historical example, with a separate manual explanation. New investigations request Chinese prose while preserving JSON keys and code identifiers. If the local model still answers in English, one additional tool-free model call produces a Chinese rendering. The original answer is retained in `original_output_text`, with an explicit `translation_note` in the UI. Translation only returns a flat array of prose strings; the application retains paths, line numbers, and array lengths unchanged; invalid translation falls back to the original. This improves readability, not diagnosis accuracy. Imported reports preserve their original language and text.
 
 ## Start everything locally
 
@@ -79,3 +79,11 @@ Frontend tests cover report validation, raw API/CLI envelopes, rejection of malf
 ## Scope
 
 This is a local, single-user workbench. The backend still holds one repository snapshot per process; do not reindex from another tab during an investigation. No authentication, persistent task queue, streaming model output, automated repair, or cloud deployment is included. The Python Docker image remains backend-only; `frontend/` can be built independently, and the documented three-process host setup is the tested local route.
+
+## V2 evidence review
+
+New reports show **证据检查**, concrete file/line citations, and **尚待确认**. A verified range means every quoted line was actually returned by a successful `read_file` call and matches the indexed snapshot. It does not verify the explanation. Missing citations, unread/truncated lines, files without valid citations, and test-only evidence require review. Old reports remain importable and are labeled unchecked; importing a saved report does not re-run the backend checks.
+
+The local model gets one tool-free, JSON-schema-constrained synthesis call using actual source reads. The unverified draft is retained separately and is not passed into synthesis, to reduce anchoring on an earlier mistake. At the tool budget, the local adapter attempts this bounded final report without requesting more tools. If synthesis fails, the existing validation still applies. This adds latency; results and failures are in [the V2 evaluation](../evaluation/V2_REPORT.md).
+
+**查找候选调用方** uses Python AST name matching. It ignores comments and string literals, but does not resolve imports, aliases, receiver types, inheritance, or dynamic dispatch. The UI labels matches as candidates. The model must read the relevant source before relying on the relationship.

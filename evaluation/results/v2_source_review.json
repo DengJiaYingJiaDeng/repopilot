@@ -1,0 +1,98 @@
+{
+  "reviewer": "development_assistant_source_audit",
+  "independent": false,
+  "target_tests_executed": false,
+  "scope": "Qualitative review against pinned source and fixing PRs, not an accuracy benchmark.",
+  "cases": [
+    {
+      "issue_id": "pallets/click#3019",
+      "revision": "fd183b2ced1cb5857784fe7fb22f4982f671f098",
+      "source_url": "https://github.com/pallets/click/issues/3019",
+      "fix_url": "https://github.com/pallets/click/pull/3021",
+      "before": "weak",
+      "after": "unsupported",
+      "note": "第一版主要复述空后缀现象。第二版错误归因于参数默认值；显式传入空串不会被默认值覆盖，仍遗漏输入路径无条件追加空格。"
+    },
+    {
+      "issue_id": "pallets/click#2952",
+      "revision": "fd183b2ced1cb5857784fe7fb22f4982f671f098",
+      "source_url": "https://github.com/pallets/click/issues/2952",
+      "fix_url": "https://github.com/pallets/click/pull/2956",
+      "before": "unsupported",
+      "after": "partial",
+      "note": "第一版误归因于 show_default。第二版找到了 flag_value 与 default 的分支，但仍未追踪环境变量值的解析与转换，不能建立完整因果链。"
+    },
+    {
+      "issue_id": "pallets/click#2836",
+      "revision": "fd183b2ced1cb5857784fe7fb22f4982f671f098",
+      "source_url": "https://github.com/pallets/click/issues/2836",
+      "fix_url": "https://github.com/pallets/click/pull/3328",
+      "before": "supported_mechanism",
+      "after": "unsupported",
+      "note": "第一版识别了 prompt_for_value 只转发布尔 show_default 的分支。第二版退步为猜测默认值或 show_default 未设置，没有说明自定义字符串被丢弃。"
+    },
+    {
+      "issue_id": "pallets/click#3015",
+      "revision": "fd183b2ced1cb5857784fe7fb22f4982f671f098",
+      "source_url": "https://github.com/pallets/click/issues/3015",
+      "fix_url": "https://github.com/pallets/click/pull/3471",
+      "before": "unsupported",
+      "after": "unsupported",
+      "note": "两版都聚焦大小写；未识别 enum 的字符串表示与 Choice 接受的规范化值不一致。"
+    },
+    {
+      "issue_id": "pallets/click#3043",
+      "revision": "fd183b2ced1cb5857784fe7fb22f4982f671f098",
+      "source_url": "https://github.com/pallets/click/issues/3043",
+      "fix_url": "https://github.com/pallets/click/pull/3126",
+      "before": "supported_mechanism",
+      "after": "supported_mechanism",
+      "note": "两版均指向 format_completion 将多行 help 直接拼入输出。与固定源码一致，但没有执行回归测试。"
+    },
+    {
+      "issue_id": "psf/requests#PR7502",
+      "revision": "661970d171d9c3e12e4c789c4768db647d8c4da0",
+      "source_url": "https://github.com/psf/requests/pull/7502",
+      "fix_url": "https://github.com/psf/requests/pull/7502",
+      "before": "weak",
+      "after": "weak",
+      "note": "两版均停留在 prepare_body 一带，没有找到 _encode_files 的运行时协议检查与 __getattr__ 文件包装器之间的问题。"
+    },
+    {
+      "issue_id": "psf/requests#PR7433",
+      "revision": "0b401c76b6e80a4eecf3c690085b2553f6e261ca",
+      "source_url": "https://github.com/psf/requests/issues/7432",
+      "fix_url": "https://github.com/psf/requests/pull/7433",
+      "before": "unsupported",
+      "after": "unsupported",
+      "note": "两版均把代理对象推测为不支持 seek。实际关键是 prepare_body 的 Iterable 检测遗漏动态 __iter__，未记录 _body_position。第二版最终引用还遗漏 models.py。"
+    },
+    {
+      "issue_id": "psf/requests#PR7309",
+      "revision": "7407309c8a8a73aa2f4337184025d440bbedab7a",
+      "source_url": "https://github.com/psf/requests/issues/6646",
+      "fix_url": "https://github.com/psf/requests/pull/7309",
+      "before": "unsupported",
+      "after": "partial",
+      "note": "第一版的编码回退解释错误。第二版正确指出对布尔值调用 strip，但没有建立解析器对缺少等号的参数写入 True 的完整路径。"
+    },
+    {
+      "issue_id": "psf/requests#PR7308",
+      "revision": "7407309c8a8a73aa2f4337184025d440bbedab7a",
+      "source_url": "https://github.com/psf/requests/pull/7308",
+      "fix_url": "https://github.com/psf/requests/pull/7308",
+      "before": "weak",
+      "after": "unsupported",
+      "note": "两版均未读到实际正则定义。第二版错误关注 to_native_string / proxy_bypass；真正需要核对的是正则 $ 对尾随换行的行为。"
+    },
+    {
+      "issue_id": "psf/requests#PR7425",
+      "revision": "dc9dbdfb3434c6e58d48fd102f93e5342308817e",
+      "source_url": "https://github.com/psf/requests/pull/7425",
+      "fix_url": "https://github.com/psf/requests/pull/7425",
+      "before": "unsupported",
+      "after": "partial",
+      "note": "第一版混淆 HookType 与输入形状。第二版提到两个入口的类型标注不一致，但未明确指出应使用 HooksInputType | None 的两个位置，且遗漏 sessions.py 引用。"
+    }
+  ]
+}

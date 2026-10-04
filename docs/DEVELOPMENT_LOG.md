@@ -83,3 +83,15 @@ The current tokenizer uses English letters and digits, with underscore and camel
 - Browser acceptance checked actual report import, source line display, tool failure/retry details, test-plan labeling, and a real local-model request. No browser console errors were observed during those flows.
 
 - Final v0.8 acceptance: 51 Python tests and 6 frontend tests pass; Ruff, mypy, TypeScript and production build pass. A real browser request returned a labeled Chinese rendering in 5.8 seconds. JSON file download could not be confirmed in the in-app browser; the export dialog also supports copying the complete report.
+
+## v0.9 — Evidence provenance and paired investigations (2026-10-05)
+
+- Added AST-based `find_callers` candidates to Agent and MCP, with explicit limitations for aliases and dynamic dispatch.
+- Added actual-read line citation checks, structured uncertainty, and review routing for insufficient evidence. Old reports remain compatible and unchecked.
+- Added one bounded, tool-free local-model synthesis with JSON schema and observed-file constraints; retained the draft separately. Tool-budget exhaustion can finish from existing reads without more tools.
+- Expanded evaluation to 10 pinned pre-fix cases across Click and Requests, preserving baseline, failed intermediate runs, a rejected reasoning probe, paired metrics, and qualitative source review.
+- Protocol completion 10/10 in both final runs; 22/22 V2 citations passed provenance. Cited-file Recall@3 fell from 0.85 to 0.70; median latency increased from 7.11s to 12.97s. No diagnosis-accuracy improvement is claimed. See `evaluation/V2_REPORT.md`.
+- Frontend displays evidence checks, specific line citations, uncertainty, and draft/synthesis distinction.
+- Fixed workbench restart preflight falsely reporting TIME_WAIT ports as occupied; actual listening services still prevent startup.
+- Local verification: 70 Python tests, 7 frontend tests, Ruff/mypy and production build. The checkout preparation script was exercised against cached repositories without executing upstream code.
+- Chinese rendering now translates prose arrays only; paths and line numbers are retained by application code, with dedicated tests.

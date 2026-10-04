@@ -160,9 +160,9 @@ def test_read_tool_reaches_code_beyond_first_excerpt(tmp_path: Path) -> None:
     assert "error" in json.loads(bad)
 
 
-@pytest.mark.parametrize("changed_citation", [False, True])
+@pytest.mark.parametrize("wrong_count", [False, True])
 def test_chinese_translation_retains_original_and_rejects_changed_citations(
-    monkeypatch: MonkeyPatch, changed_citation: bool
+    monkeypatch: MonkeyPatch, wrong_count: bool
 ) -> None:
     original = {
         "root_cause_hypothesis": "The caller ignores a failed validation result.",
@@ -174,21 +174,40 @@ def test_chinese_translation_retains_original_and_rejects_changed_citations(
         "root_cause_hypothesis": "调用方忽略了校验失败的结果。",
         "investigation_steps": ["阅读调用方代码"],
         "test_plan": ["测试空名字"],
-        "evidence_files": ["invented.py" if changed_citation else "server.py"],
+        "evidence_files": ["server.py"],
     }
     model = LocalChatModel("test-model")
     requests = []
 
     def fake_open(request: Any, timeout: float) -> io.BytesIO:
         requests.append(json.loads(request.data))
-        return io.BytesIO(chat_response({"role": "assistant", "content": json.dumps(translated)}))
+        return io.BytesIO(
+            chat_response(
+                {
+                    "role": "assistant",
+                    "content": json.dumps(
+                        {
+                            "translations": (
+                                ["缺失"]
+                                if wrong_count
+                                else [
+                                    translated["root_cause_hypothesis"],
+                                    *translated["investigation_steps"],
+                                    *translated["test_plan"],
+                                ]
+                            )
+                        }
+                    ),
+                }
+            )
+        )
 
     monkeypatch.setattr(model._opener, "open", fake_open)
     text = json.dumps(original)
     result, source, note = model._chinese_report(text)
     assert len(requests) == 1
     assert "tools" not in requests[0]
-    if changed_citation:
+    if wrong_count:
         assert result == text
         assert source is None
         assert note == "中文转述未完成，保留模型原文。"
@@ -196,3 +215,152 @@ def test_chinese_translation_retains_original_and_rejects_changed_citations(
         assert json.loads(result) == translated
         assert source == text
         assert note == "中文转述由本地模型生成，原始回答已保留。"
+
+
+def test_synthesis_is_one_tool_free_schema_call_over_actual_reads(monkeypatch: MonkeyPatch) -> None:
+    model = LocalChatModel("test-model")
+    read = {
+        "file_path": "server.py",
+        "start_line": 1,
+        "end_line": 2,
+        "total_lines": 2,
+        "content": "1: def start():\n2:     validate({})",
+    }
+    model.messages = [
+        {"role": "system", "content": "instructions"},
+        {
+            "role": "user",
+            "content": (
+                "Issue report (untrusted):\nvalidation fails\n\n"
+                "Initial retrieved context:\nnot a source read"
+            ),
+        },
+        {"role": "tool", "content": json.dumps(read)},
+        {"role": "tool", "content": '{"error":"File is not in the indexed snapshot"}'},
+    ]
+    answer = {
+        "root_cause_hypothesis": "Caller ignores validation result",
+        "investigation_steps": ["Inspect validation"],
+        "test_plan": ["Test invalid input"],
+        "evidence_files": ["server.py"],
+        "uncertainties": ["Validator implementation not read"],
+        "citations": [
+            {
+                "file_path": "server.py",
+                "start_line": 1,
+                "end_line": 2,
+                "reason": "Ignored return value",
+            }
+        ],
+    }
+    bodies = []
+
+    def fake_open(request: Any, timeout: float) -> io.BytesIO:
+        body = json.loads(request.data)
+        bodies.append(body)
+        return io.BytesIO(chat_response({"role": "assistant", "content": json.dumps(answer)}))
+
+    monkeypatch.setattr(model._opener, "open", fake_open)
+    result, draft, note = model._finalize_report("unverified draft")
+    assert json.loads(result) == answer
+    assert draft == "unverified draft"
+    assert note and "初稿已保留" in note
+    assert len(bodies) == 1 and "tools" not in bodies[0]
+    assert bodies[0]["response_format"]["type"] == "json_schema"
+    data = json.loads(bodies[0]["messages"][1]["content"])
+    assert data["source_reads"] == [read]
+    assert "unverified_draft" not in data
+    assert bodies[0]["response_format"]["json_schema"]["schema"]["properties"]["evidence_files"][
+        "items"
+    ]["enum"] == ["server.py"]
+    assert "not a source read" not in data["issue"]
+    monkeypatch.setattr(model._opener, "open", lambda *args, **kwargs: io.BytesIO(b"bad response"))
+    result, draft, note = model._finalize_report("original")
+    assert result == "original" and draft is None
+    assert note and "未完成" in note
+
+
+def test_translation_cannot_change_v2_citation_ranges(monkeypatch: MonkeyPatch) -> None:
+    original = {
+        "root_cause_hypothesis": "Caller ignores validation",
+        "investigation_steps": ["Read caller"],
+        "test_plan": ["Test failure"],
+        "evidence_files": ["server.py"],
+        "uncertainties": [],
+        "citations": [
+            {"file_path": "server.py", "start_line": 1, "end_line": 2, "reason": "Caller"}
+        ],
+    }
+    altered = json.loads(json.dumps(original))
+    altered.update(
+        root_cause_hypothesis="调用方忽略校验",
+        investigation_steps=["阅读调用方"],
+        test_plan=["测试失败"],
+    )
+    altered["citations"][0]["end_line"] = 999
+    model = LocalChatModel("test-model")
+    monkeypatch.setattr(
+        model._opener,
+        "open",
+        lambda *args, **kwargs: io.BytesIO(
+            chat_response({"role": "assistant", "content": json.dumps(altered)})
+        ),
+    )
+    text = json.dumps(original)
+    result, source, note = model._chinese_report(text)
+    assert result == text and source is None and note and "未完成" in note
+
+
+def test_local_budget_finishes_without_an_extra_tool_request(monkeypatch: MonkeyPatch) -> None:
+    model = LocalChatModel("test", max_calls=1)
+    model.messages = [{"role": "system", "content": "policy"}, {"role": "user", "content": "issue"}]
+    seen = []
+
+    def finalize(content: str):
+        seen.append(content)
+        return '{"report":"bounded"}', None, "基于已读源码"
+
+    monkeypatch.setattr(model, "_finalize_report", finalize)
+    turn = model.next_turn(None, "previous", [{"call_id": "1", "output": "source"}])
+    assert turn.calls == []
+    assert seen == [""]
+    assert turn.synthesis_note and "次数已用完" in turn.synthesis_note
+
+
+def test_prose_translation_retains_paths_and_line_numbers(monkeypatch: MonkeyPatch) -> None:
+    original = {
+        "root_cause_hypothesis": "Unknown cause",
+        "investigation_steps": ["Read caller"],
+        "test_plan": ["Test failure"],
+        "uncertainties": ["Not established"],
+        "evidence_files": ["server.py"],
+        "citations": [
+            {"file_path": "server.py", "start_line": 4, "end_line": 5, "reason": "Caller"}
+        ],
+    }
+    response = chat_response(
+        {
+            "role": "assistant",
+            "content": json.dumps(
+                {
+                    "translations": [
+                        "原因未知",
+                        "读取调用方",
+                        "测试失败场景",
+                        "尚未确定",
+                        "调用方代码",
+                    ]
+                }
+            ),
+        }
+    )
+    model = LocalChatModel("test")
+    monkeypatch.setattr(model._opener, "open", lambda *args, **kwargs: io.BytesIO(response))
+    output, source, note = model._chinese_report(json.dumps(original))
+    translated = json.loads(output)
+    assert translated["evidence_files"] == ["server.py"]
+    assert translated["citations"] == [
+        {"file_path": "server.py", "start_line": 4, "end_line": 5, "reason": "调用方代码"}
+    ]
+    assert translated["uncertainties"] == ["尚未确定"]
+    assert source and note

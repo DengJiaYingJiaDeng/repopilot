@@ -26,3 +26,8 @@ async def test_mcp_search_read_and_symbol_tools() -> None:
         symbols = await client.call_tool("find_symbol", {"name": "start_mcp"})
         assert symbols.structured_content is not None
         assert symbols.structured_content["result"][0]["symbol"].endswith("start_mcp_server")
+
+        callers = await client.call_tool("find_callers", {"name": "validate_server_config"})
+        assert callers.structured_content is not None
+        assert callers.structured_content["result"][0]["file_path"] == "mcp_server.py"
+        assert callers.structured_content["result"][0]["match_kind"] == "name_candidate"

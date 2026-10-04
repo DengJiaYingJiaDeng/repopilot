@@ -32,6 +32,7 @@ import {
   api,
   collectEvidence,
   explainFailure,
+  explainEvidenceCheck,
   indexSchema,
   isRecord,
   parseReport,
@@ -60,6 +61,7 @@ const toolNames: Record<string, string> = {
   read_file: '读取源码',
   search_code: '搜索代码',
   find_symbol: '查找符号',
+  find_callers: '查找候选调用方',
 }
 
 function CodeBlock({ evidence }: { evidence: Evidence }) {
@@ -114,8 +116,13 @@ function ToolDetails({ output }: { output: string }) {
               <summary>
                 <FileCode2 size={14} />
                 {String(item.file_path ?? '')}
-                <span>{String(item.symbol ?? '')}</span>
+                <span>{String(item.symbol ?? item.caller ?? '')}</span>
               </summary>
+              {item.match_kind === 'name_candidate' && (
+                <p className="caller-note">
+                  按名称匹配的候选调用位置；尚未解析类型、别名或动态分派，需阅读源码确认。
+                </p>
+              )}
               <pre>{String(item.content ?? '')}</pre>
             </details>
           ) : null,
@@ -347,7 +354,7 @@ export default function App() {
           </div>
         </div>
         <div className="version">
-          RepoPilot v0.8 <span>实验性项目</span>
+          RepoPilot v0.9 <span>实验性项目</span>
         </div>
       </aside>
 
@@ -652,6 +659,38 @@ export default function App() {
                               <p>{report.result.limitation}</p>
                             </div>
                           )}
+                          <section
+                            className={`evidence-assessment ${report.result.evidence_status}`}
+                            aria-label="证据检查"
+                          >
+                            <div className="subheading">
+                              <span>
+                                <ShieldCheck size={16} />
+                                证据检查
+                              </span>
+                              <em>
+                                {report.result.evidence_status === 'verified'
+                                  ? '引用范围已核对'
+                                  : report.result.evidence_status === 'insufficient'
+                                    ? '证据不足 · 需要复核'
+                                    : '尚未完成检查'}
+                              </em>
+                            </div>
+                            <p>
+                              {report.result.evidence_status === 'verified'
+                                ? '引用行号均来自模型实际读到的源码。这里只核对证据来源，不代表根因判断正确。'
+                                : report.result.evidence_status === 'insufficient'
+                                  ? '这份报告已返回，但部分依据未通过检查，请先复核下列问题。'
+                                  : '旧报告或未完成的调查没有可用的逐行检查结果。'}
+                            </p>
+                            {report.result.evidence_checks.length > 0 && (
+                              <ul>
+                                {report.result.evidence_checks.map((code) => (
+                                  <li key={code}>{explainEvidenceCheck(code)}</li>
+                                ))}
+                              </ul>
+                            )}
+                          </section>
                           {source === 'live' &&
                             report.result.root_cause_hypothesis &&
                             !/[\u3400-\u9fff]/.test(report.result.root_cause_hypothesis) && (
@@ -676,6 +715,15 @@ export default function App() {
                               这是待验证的解释，不表示问题已经被修复。
                             </div>
                           </div>
+                          {report.result.synthesis_note && (
+                            <p className="language-note">{report.result.synthesis_note}</p>
+                          )}
+                          {report.result.draft_output_text && (
+                            <details className="original-answer">
+                              <summary>查看证据整理前的模型初稿</summary>
+                              <pre>{report.result.draft_output_text}</pre>
+                            </details>
+                          )}
                           {report.result.translation_note && (
                             <p className="language-note">{report.result.translation_note}</p>
                           )}
@@ -705,6 +753,58 @@ export default function App() {
                                 ，并测试“空名字时应阻止启动”。这段讲解仅针对示例，不是模型自动得出的结论。
                               </p>
                             </div>
+                          )}
+                          {report.result.citations.length > 0 && (
+                            <section className="citation-list" aria-label="具体代码引用">
+                              <h3>具体代码引用</h3>
+                              {report.result.citations.map((citation, i) => (
+                                <details
+                                  key={i}
+                                  className={
+                                    citation.verified ? 'citation verified' : 'citation unverified'
+                                  }
+                                >
+                                  <summary>
+                                    <FileCode2 size={14} />
+                                    <span>
+                                      {citation.file_path}:L{citation.start_line}–
+                                      {citation.end_line}
+                                    </span>
+                                    <small>{citation.verified ? '已读到' : '未通过检查'}</small>
+                                  </summary>
+                                  <p>{citation.reason}</p>
+                                  {citation.problems.length > 0 && (
+                                    <ul>
+                                      {citation.problems.map((problem) => (
+                                        <li key={problem}>{explainEvidenceCheck(problem)}</li>
+                                      ))}
+                                    </ul>
+                                  )}
+                                  {citation.content && (
+                                    <CodeBlock
+                                      evidence={{
+                                        path: citation.file_path,
+                                        symbol: '引用',
+                                        start: citation.start_line,
+                                        end: citation.end_line,
+                                        content: citation.content,
+                                        origin: '具体引用',
+                                      }}
+                                    />
+                                  )}
+                                </details>
+                              ))}
+                            </section>
+                          )}
+                          {report.result.uncertainties.length > 0 && (
+                            <section className="uncertainties">
+                              <h3>尚待确认</h3>
+                              <ul>
+                                {report.result.uncertainties.map((item, i) => (
+                                  <li key={i}>{item}</li>
+                                ))}
+                              </ul>
+                            </section>
                           )}
                           <div className="subheading section-gap">
                             <span>

@@ -81,7 +81,7 @@ python -m repopilot.demo tests/fixtures/sample_repo \
 
 The fixture is a synthetic smoke case, not a historical issue. Omit `--local-model` to run only BM25 context retrieval. The JSON includes the indexed-file counts, source evidence, tool trace, hypothesis and test plan. No target tests are executed and no fixes are applied.
 
-The local adapter offers `read_file` as a required first call; later calls can use all three tools or conclude. This is an explicit investigation policy, not evidence that the model spontaneously chose to inspect code. File reads support line ranges, capped at 200 lines / 8,000 characters. Provider failures, context/output limits, malformed JSON, unseen citations, and exhausted tool budgets yield `status=incomplete` and a reason. `status=complete` only means the output satisfied the protocol and evidence-path checks; it does **not** certify the diagnosis.
+The local adapter offers `read_file` as a required first call; later calls can use all four tools or conclude. This is an explicit investigation policy, not evidence that the model spontaneously chose to inspect code. File reads support line ranges, capped at 200 lines / 8,000 characters. Provider failures, context/output limits, malformed JSON, and unseen citations yield `status=incomplete` and a reason. `status=complete` only means the output satisfied the protocol and evidence-path checks; it does **not** certify the diagnosis.
 
 Stop terminal A with Ctrl+C when done to release model memory.
 
@@ -109,3 +109,5 @@ Index a repository and call `/investigate` as described in the README. You can l
 - **Wrong diagnosis**: inspect the cited source and proposed tests. The small local model can produce plausible but incorrect causal explanations.
 
 See `evaluation/LOCAL_MODEL_REPORT.md` for measured results and limitations.
+
+V0.9 also assembles a final report in one tool-free request with a JSON schema over actual source reads, preserving the draft separately. This can happen when the configured tool budget is reached. The resulting citation ranges are checked against the source actually returned to the model; missing or unread evidence is marked for review. This is an additional local inference call, with a 2,200-token output cap, and can increase latency. It does not run tests or certify a root cause.

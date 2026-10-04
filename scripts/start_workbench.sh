@@ -20,6 +20,7 @@ if len(set(ports)) != 3:
 for port in ports:
     try:
         with socket.socket() as s:
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             s.bind(('127.0.0.1',port))
     except OSError:
         raise SystemExit(f'端口 {port} 已被占用。请先关闭之前启动的工作台，再重新运行。')

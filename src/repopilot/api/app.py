@@ -51,7 +51,7 @@ Service = Annotated[RepoPilotService, Depends(get_service)]
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
-    application = FastAPI(title="RepoPilot", version="0.8.0")
+    application = FastAPI(title="RepoPilot", version="0.9.0")
     config = settings or Settings()
     application.add_middleware(
         CORSMiddleware,
@@ -71,6 +71,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                     config.investigation_model or "local-model",
                     config.local_model_url,
                     config.model_timeout,
+                    max_calls=config.max_agent_calls,
                 ),
             )
         else:

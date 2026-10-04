@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+from repopilot.callgraph import CallSite, index_calls
 from repopilot.config import Settings
 from repopilot.domain import (
     AnalysisResult,
@@ -70,6 +71,7 @@ class RepoPilotService:
         self._indexed_files: dict[str, str] = {}
         self._chunks: list[CodeChunk] = []
         self._indexed = False
+        self._call_sites: dict[str, list[CallSite]] = {}
 
     def index(self, path: Path) -> IndexSummary:
         scan = scan_repository(path, self.settings.allowed_root, self.settings.max_file_bytes)
@@ -93,6 +95,7 @@ class RepoPilotService:
         self._indexed = False
         for retriever in self._index_targets:
             retriever.index(chunks)
+        self._call_sites = index_calls(indexed_files)
         self._indexed_files = indexed_files
         self._chunks = chunks
         self._indexed = True
@@ -153,3 +156,20 @@ class RepoPilotService:
         ]
         matches.sort(key=lambda item: (item.chunk.file_path, item.chunk.start_line))
         return matches[:top_k]
+
+    def find_callers(self, name: str, top_k: int = 10) -> list[CallSite]:
+        """Return possible callers by final identifier; not full name resolution."""
+        if not self._indexed:
+            raise IndexNotReadyError("Index a repository before finding callers")
+        candidates = self._call_sites.get(name.rsplit(".", 1)[-1], [])
+        ranked = sorted(
+            candidates,
+            key=lambda c: (
+                any(
+                    p in {"test", "tests"} or p.startswith("test_") for p in c.file_path.split("/")
+                ),
+                c.file_path,
+                c.call_line,
+            ),
+        )
+        return ranked[:top_k]

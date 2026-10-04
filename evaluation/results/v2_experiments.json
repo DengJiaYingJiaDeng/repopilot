@@ -1,0 +1,56 @@
+[
+  {
+    "artifact": "v2_baseline.json",
+    "sha256": "1ee2c4e5ce9132a3f199aa96636f2708cf997a6322386116e3ab33c575c796da",
+    "source_digest": "d8fa29f5e3765f73c0543b8b7933790ef48413930f8f80980aee44fa266287fc",
+    "case_count": 10,
+    "synthesis_thinking": false,
+    "synthesis_token_cap": null,
+    "note": "Baseline v0.8; no synthesis"
+  },
+  {
+    "artifact": "v2_candidate.json",
+    "sha256": "8200610fe6ca0f5703079139af899e0f65391a7d2ad8aa043dbef576dfb8d1ed",
+    "source_digest": "484e840a47e79b3e0650c47094e4c42fa0d1eecdd9e1fa08538b0155c95b87c0",
+    "case_count": 10,
+    "synthesis_thinking": false,
+    "synthesis_token_cap": null,
+    "note": "Caller tool and citation prompt only; missing fields and invalid reports retained"
+  },
+  {
+    "artifact": "v2_draft_conditioned.json",
+    "sha256": "7068895e5f2b541327310545015733e7d9a733b47ca2887260b9e75eccdb9a32",
+    "source_digest": "7779213a830a0a95f913ae002e756e1446c13e1a4200a233145da1e524e263d5",
+    "case_count": 10,
+    "synthesis_thinking": false,
+    "synthesis_token_cap": 2200,
+    "note": "Structured synthesis supplied with the unverified draft"
+  },
+  {
+    "artifact": "v2_final.json",
+    "sha256": "e2e0aa9a896371092e106db49a420b65a788c04b2af5c40d8cb2f167a4ff325c",
+    "source_digest": "75fbecd3f642245daa31823d17bf4a07c073c7e77bf8a9ce30b52da363112c2f",
+    "case_count": 10,
+    "synthesis_thinking": false,
+    "synthesis_token_cap": 2200,
+    "note": "Selected: source-only structured synthesis, path enum, bounded finish"
+  },
+  {
+    "artifact": "v2_reasoning_probe.json",
+    "sha256": "2a2ab158f2fd1badd2a8204ca1d4094e341413e19f0b813394cbe2290e7c0f29",
+    "source_digest": "2b7e87214ef8a204e395a3edfd0b5f46951d5b4ebbd3c0f261b34dec7c6a8fd2",
+    "case_count": 3,
+    "synthesis_thinking": true,
+    "synthesis_token_cap": 4096,
+    "note": "Rejected 3-case probe: thinking in final synthesis; slow and still wrong/truncated"
+  },
+  {
+    "artifact": "v2_release_verification.json",
+    "sha256": "bcafba39383d48c4fc6110d633f660b3ec8ed6f3049e2a47d1835e227fd0f044",
+    "source_digest": "c308e2cff7eca10592b77e5a0ec18f57c3fc94b03687a0c5c40282cd10adcb7d",
+    "case_count": 10,
+    "synthesis_thinking": false,
+    "synthesis_token_cap": 2200,
+    "note": "Release verification after Chinese prose-only translation fix; all cases retained separately from the primary comparison."
+  }
+]

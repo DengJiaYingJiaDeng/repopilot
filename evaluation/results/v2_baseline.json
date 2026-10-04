@@ -1,0 +1,801 @@
+{
+  "schema_version": 1,
+  "source_commit": "43bf904966bf1b52af139bde32481d42607d42fb",
+  "source_digest": "d8fa29f5e3765f73c0543b8b7933790ef48413930f8f80980aee44fa266287fc",
+  "dataset_sha256": "476fa9877005bfddf1508b64a48f37e59f16df0283a57b55b895d1ff3957a161",
+  "model": "qwen3-4b",
+  "settings": {
+    "method": "bm25",
+    "max_agent_calls": 6,
+    "response_language": "en"
+  },
+  "scope": "Manually curated development cases. No independent accuracy estimate.",
+  "records": [
+    {
+      "issue_id": "pallets/click#3019",
+      "repository": "pallets/click",
+      "revision": "fd183b2ced1cb5857784fe7fb22f4982f671f098",
+      "elapsed_seconds": 7.259,
+      "initial_recall_at_3": 1.0,
+      "cited_recall_at_3": 1.0,
+      "result": {
+        "issue_text": "click.prompt and click.confirm ignore an empty prompt_suffix. Supplying prompt_suffix='' still renders a suffix instead of no suffix.",
+        "status": "complete",
+        "root_cause_hypothesis": "The issue may be due to the `prompt_suffix` parameter in the `confirm` function not being properly handled when it is an empty string, leading to an unexpected suffix being displayed even when it should not be.",
+        "investigation_steps": [
+          "Verify the logic in the `confirm` function that constructs the prompt and handles the `prompt_suffix` parameter.",
+          "Check how the `prompt_suffix` is used in the `_build_prompt` function to ensure it is correctly applied or omitted based on the input.",
+          "Inspect the `prompt` function to see if there are any similar issues with handling the `prompt_suffix` parameter in other contexts."
+        ],
+        "test_plan": [
+          "Run tests that explicitly set `prompt_suffix` to an empty string and verify that no suffix is displayed.",
+          "Test the `confirm` function with various values of `prompt_suffix` to ensure it behaves as expected.",
+          "Check the `prompt` function for similar logic to ensure it handles the `prompt_suffix` parameter correctly."
+        ],
+        "evidence_files": [
+          "src/click/termui.py",
+          "src/click/core.py",
+          "tests/test_utils.py"
+        ],
+        "tool_trace": [
+          {
+            "name": "read_file",
+            "arguments": {
+              "path": "src/click/termui.py",
+              "start_line": 194,
+              "end_line": 252
+            },
+            "output_characters": 2608,
+            "returned_error": false,
+            "observed_ranges": [
+              {
+                "file_path": "src/click/termui.py",
+                "start_line": 194,
+                "end_line": 252
+              }
+            ]
+          },
+          {
+            "name": "read_file",
+            "arguments": {
+              "path": "src/click/termui.py",
+              "start_line": 83,
+              "end_line": 191
+            },
+            "output_characters": 5101,
+            "returned_error": false,
+            "observed_ranges": [
+              {
+                "file_path": "src/click/termui.py",
+                "start_line": 83,
+                "end_line": 191
+              }
+            ]
+          }
+        ],
+        "limitation": null,
+        "review_required": false,
+        "original_output_text": null,
+        "translation_note": null
+      }
+    },
+    {
+      "issue_id": "pallets/click#2952",
+      "repository": "pallets/click",
+      "revision": "fd183b2ced1cb5857784fe7fb22f4982f671f098",
+      "elapsed_seconds": 7.739,
+      "initial_recall_at_3": 0.5,
+      "cited_recall_at_3": 0.5,
+      "result": {
+        "issue_text": "A boolean flag option configured with an environment variable yields True even when the variable indicates a false value. The bug involves default, flag_value, and type handling.",
+        "status": "complete",
+        "root_cause_hypothesis": "The issue arises from the `Option` class's `__init__` method, where the `show_default` parameter is not properly handled for boolean flags when the default value is `False`. Specifically, the code may not correctly determine whether to show the default value based on the `is_flag` and `flag_value` parameters.",
+        "investigation_steps": [
+          "Verify the logic in the `Option` class's `__init__` method that handles `show_default` for boolean flags.",
+          "Check how the `show_default` parameter interacts with `is_flag` and `flag_value` in the `Option` class.",
+          "Inspect the `get_help_extra` and `get_help_record` methods to ensure they correctly reflect the `show_default` setting for boolean flags."
+        ],
+        "test_plan": [
+          "Run the `test_hide_false_default_boolean_flag_value` test to confirm the behavior of the `show_default` parameter for boolean flags with a `False` default.",
+          "Run the `test_show_true_default_boolean_flag_value` test to ensure that the `show_default` parameter correctly displays the default value for boolean flags with a `True` default.",
+          "Run the `test_show_default_boolean_flag_name` test to verify that the `show_default` parameter correctly displays the default name for boolean flags with distinct `True`/`False` options."
+        ],
+        "evidence_files": [
+          "src/click/core.py",
+          "tests/test_options.py"
+        ],
+        "tool_trace": [
+          {
+            "name": "read_file",
+            "arguments": {
+              "path": "src/click/core.py",
+              "start_line": 2465,
+              "end_line": 3033
+            },
+            "output_characters": 8344,
+            "returned_error": false,
+            "observed_ranges": [
+              {
+                "file_path": "src/click/core.py",
+                "start_line": 2465,
+                "end_line": 2664
+              }
+            ]
+          },
+          {
+            "name": "find_symbol",
+            "arguments": {
+              "name": "Option.__init__"
+            },
+            "output_characters": 4737,
+            "returned_error": false,
+            "observed_ranges": [
+              {
+                "file_path": "src/click/core.py",
+                "start_line": 2533,
+                "end_line": 2663
+              },
+              {
+                "file_path": "src/click/exceptions.py",
+                "start_line": 215,
+                "end_line": 227
+              },
+              {
+                "file_path": "src/click/parser.py",
+                "start_line": 129,
+                "end_line": 160
+              },
+              {
+                "file_path": "tests/test_context.py",
+                "start_line": 300,
+                "end_line": 303
+              },
+              {
+                "file_path": "tests/test_context.py",
+                "start_line": 369,
+                "end_line": 371
+              }
+            ]
+          }
+        ],
+        "limitation": null,
+        "review_required": false,
+        "original_output_text": null,
+        "translation_note": null
+      }
+    },
+    {
+      "issue_id": "pallets/click#2836",
+      "repository": "pallets/click",
+      "revision": "fd183b2ced1cb5857784fe7fb22f4982f671f098",
+      "elapsed_seconds": 6.956,
+      "initial_recall_at_3": 1.0,
+      "cited_recall_at_3": 1.0,
+      "result": {
+        "issue_text": "An Option using show_default as a custom string does not display that string in an interactive prompt, although it appears in help output.",
+        "status": "complete",
+        "root_cause_hypothesis": "The issue arises because the `show_default` parameter is not being properly respected when it is set to a string value in the `Option` class. The `prompt_for_value` method checks if `show_default` is a boolean, but when it is a string, it does not pass it to the `prompt` function, leading to the default value not being displayed in the interactive prompt.",
+        "investigation_steps": [
+          "Verify that the `show_default` parameter is correctly passed to the `prompt` function in the `prompt_for_value` method.",
+          "Check the `prompt` function's implementation to confirm how `show_default` is used in the prompt generation.",
+          "Test the behavior with both boolean and string values for `show_default` to ensure consistent handling."
+        ],
+        "test_plan": [
+          "Run the test case `test_false_show_default_cause_no_default_display_in_prompt` to confirm the issue.",
+          "Modify the `show_default` parameter to a string and verify that the string is displayed in the prompt.",
+          "Inspect the `prompt` function's logic to ensure that `show_default` is correctly handled for both boolean and string values."
+        ],
+        "evidence_files": [
+          "src/click/core.py",
+          "src/click/termui.py"
+        ],
+        "tool_trace": [
+          {
+            "name": "read_file",
+            "arguments": {
+              "path": "src/click/core.py",
+              "start_line": 2928,
+              "end_line": 2959
+            },
+            "output_characters": 1672,
+            "returned_error": false,
+            "observed_ranges": [
+              {
+                "file_path": "src/click/core.py",
+                "start_line": 2928,
+                "end_line": 2959
+              }
+            ]
+          },
+          {
+            "name": "find_symbol",
+            "arguments": {
+              "name": "Option.prompt_for_value"
+            },
+            "output_characters": 1494,
+            "returned_error": false,
+            "observed_ranges": [
+              {
+                "file_path": "src/click/core.py",
+                "start_line": 2928,
+                "end_line": 2959
+              }
+            ]
+          },
+          {
+            "name": "read_file",
+            "arguments": {
+              "path": "src/click/termui.py",
+              "start_line": 83,
+              "end_line": 191
+            },
+            "output_characters": 5101,
+            "returned_error": false,
+            "observed_ranges": [
+              {
+                "file_path": "src/click/termui.py",
+                "start_line": 83,
+                "end_line": 191
+              }
+            ]
+          }
+        ],
+        "limitation": null,
+        "review_required": false,
+        "original_output_text": null,
+        "translation_note": null
+      }
+    },
+    {
+      "issue_id": "pallets/click#3015",
+      "repository": "pallets/click",
+      "revision": "fd183b2ced1cb5857784fe7fb22f4982f671f098",
+      "elapsed_seconds": 5.325,
+      "initial_recall_at_3": 1.0,
+      "cited_recall_at_3": 1.0,
+      "result": {
+        "issue_text": "Choice shell autocomplete returns the wrong value for enum choices; the completion result cannot be passed back as the chosen enum.",
+        "status": "complete",
+        "root_cause_hypothesis": "The issue might be that the shell completion is not correctly handling the case-insensitive matching for enum choices, leading to incorrect completion suggestions.",
+        "investigation_steps": [
+          "Verify the logic in the `Choice.shell_complete` method for case-insensitive matching.",
+          "Check if the `self.choices` are being properly normalized and converted to strings before completion.",
+          "Test the completion logic with both case-sensitive and case-insensitive scenarios to ensure correct behavior."
+        ],
+        "test_plan": [
+          "Run the test case provided in `test_choice_argument_enum` to verify the completion behavior for both case-sensitive and case-insensitive scenarios.",
+          "Create a custom test case that explicitly tests case-insensitive completion for enum choices.",
+          "Use the `Choice.shell_complete` method directly to simulate completion scenarios and validate the output."
+        ],
+        "evidence_files": [
+          "src/click/types.py",
+          "tests/test_basic.py",
+          "src/click/types.py",
+          "src/click/shell_completion.py"
+        ],
+        "tool_trace": [
+          {
+            "name": "read_file",
+            "arguments": {
+              "path": "src/click/types.py",
+              "start_line": 377,
+              "end_line": 398
+            },
+            "output_characters": 1112,
+            "returned_error": false,
+            "observed_ranges": [
+              {
+                "file_path": "src/click/types.py",
+                "start_line": 377,
+                "end_line": 398
+              }
+            ]
+          },
+          {
+            "name": "find_symbol",
+            "arguments": {
+              "name": "Choice.shell_complete"
+            },
+            "output_characters": 1014,
+            "returned_error": false,
+            "observed_ranges": [
+              {
+                "file_path": "src/click/types.py",
+                "start_line": 377,
+                "end_line": 398
+              }
+            ]
+          }
+        ],
+        "limitation": null,
+        "review_required": false,
+        "original_output_text": null,
+        "translation_note": null
+      }
+    },
+    {
+      "issue_id": "pallets/click#3043",
+      "repository": "pallets/click",
+      "revision": "fd183b2ced1cb5857784fe7fb22f4982f671f098",
+      "elapsed_seconds": 4.518,
+      "initial_recall_at_3": 1.0,
+      "cited_recall_at_3": 1.0,
+      "result": {
+        "issue_text": "Fish shell completion breaks when a completion item's help text spans multiple lines. The generated completion value is malformed.",
+        "status": "complete",
+        "root_cause_hypothesis": "The issue arises from the formatting of completion items when the help text is present. The Fish shell completion might be breaking because the help text is being included in a way that disrupts the expected format, particularly when the help text spans multiple lines.",
+        "investigation_steps": [
+          "Verify the formatting logic in FishComplete.format_completion for handling multi-line help texts.",
+          "Check how the Fish shell interprets the formatted completion strings, especially when they contain newlines or special characters.",
+          "Inspect the Fish shell's completion logic to see how it processes the generated completion strings."
+        ],
+        "test_plan": [
+          "Reproduce the issue by generating a completion item with a multi-line help text and inspecting the generated string.",
+          "Test the completion in the Fish shell to confirm the malformed output.",
+          "Validate the Fish shell's parsing logic to ensure it correctly handles the formatted completion strings."
+        ],
+        "evidence_files": [
+          "src/click/shell_completion.py"
+        ],
+        "tool_trace": [
+          {
+            "name": "read_file",
+            "arguments": {
+              "path": "src/click/shell_completion.py",
+              "start_line": 397,
+              "end_line": 401
+            },
+            "output_characters": 386,
+            "returned_error": false,
+            "observed_ranges": [
+              {
+                "file_path": "src/click/shell_completion.py",
+                "start_line": 397,
+                "end_line": 401
+              }
+            ]
+          },
+          {
+            "name": "find_symbol",
+            "arguments": {
+              "name": "FishComplete.format_completion"
+            },
+            "output_characters": 383,
+            "returned_error": false,
+            "observed_ranges": [
+              {
+                "file_path": "src/click/shell_completion.py",
+                "start_line": 397,
+                "end_line": 401
+              }
+            ]
+          }
+        ],
+        "limitation": null,
+        "review_required": false,
+        "original_output_text": null,
+        "translation_note": null
+      }
+    },
+    {
+      "issue_id": "psf/requests#PR7502",
+      "repository": "psf/requests",
+      "revision": "661970d171d9c3e12e4c789c4768db647d8c4da0",
+      "elapsed_seconds": 6.232,
+      "initial_recall_at_3": 1.0,
+      "cited_recall_at_3": 1.0,
+      "result": {
+        "issue_text": "Multipart upload with files={\"file\": tempfile.NamedTemporaryFile(...)} fails although the file wrapper supports reading. Direct file-like objects work. Locate why the wrapped file is not handled correctly.",
+        "status": "complete",
+        "root_cause_hypothesis": "The issue may be related to how the `prepare_body` method in `requests` handles file-like objects, particularly when they are wrapped in a `tempfile.NamedTemporaryFile`.",
+        "investigation_steps": [
+          "Verify the `prepare_body` method's logic for handling file-like objects and checking for `__iter__` attributes.",
+          "Check if the `tempfile.NamedTemporaryFile` is being treated as a file-like object with `__iter__` and `tell()` methods.",
+          "Inspect the `_encode_files` method to see how it processes files and whether it's excluding the `tempfile.NamedTemporaryFile` case.",
+          "Test the `prepare_body` method with a custom file-like object to see if it's being recognized as a file and handled correctly."
+        ],
+        "test_plan": [
+          "Create a custom file-like object that mimics `tempfile.NamedTemporaryFile` and test if it's recognized by `prepare_body`.",
+          "Run the `test_can_send_objects_with_files` test to ensure that files are being handled correctly.",
+          "Check the `TestRequests.test_prepare_body_position_non_stream` test to ensure that non-streamed bodies are handled correctly."
+        ],
+        "evidence_files": [
+          "src/requests/models.py",
+          "tests/test_requests.py"
+        ],
+        "tool_trace": [
+          {
+            "name": "read_file",
+            "arguments": {
+              "path": "src/requests/models.py",
+              "start_line": 577,
+              "end_line": 653
+            },
+            "output_characters": 3794,
+            "returned_error": false,
+            "observed_ranges": [
+              {
+                "file_path": "src/requests/models.py",
+                "start_line": 577,
+                "end_line": 653
+              }
+            ]
+          },
+          {
+            "name": "find_symbol",
+            "arguments": {
+              "name": "prepare_body"
+            },
+            "output_characters": 2655,
+            "returned_error": false,
+            "observed_ranges": [
+              {
+                "file_path": "src/requests/models.py",
+                "start_line": 577,
+                "end_line": 653
+              },
+              {
+                "file_path": "tests/test_requests.py",
+                "start_line": 1981,
+                "end_line": 1984
+              }
+            ]
+          }
+        ],
+        "limitation": null,
+        "review_required": false,
+        "original_output_text": null,
+        "translation_note": null
+      }
+    },
+    {
+      "issue_id": "psf/requests#PR7433",
+      "repository": "psf/requests",
+      "revision": "0b401c76b6e80a4eecf3c690085b2553f6e261ca",
+      "elapsed_seconds": 9.304,
+      "initial_recall_at_3": 0.0,
+      "cited_recall_at_3": 1.0,
+      "result": {
+        "issue_text": "An upload body wrapped by tqdm.wrapattr or a __getattr__ proxy becomes empty after a 307/308 redirect. The same upload succeeds without a redirect. Investigate stream detection and body rewinding.",
+        "status": "complete",
+        "root_cause_hypothesis": "The issue arises when an upload body is wrapped by tqdm.wrapattr or a __getattr__ proxy, making it non-seekable. The rewind_body function attempts to rewind the body for redirects, but if the body is not seekable, it raises an error, leading to an empty body after a redirect.",
+        "investigation_steps": [
+          "Verify that the body is not seekable when wrapped by tqdm.wrapattr or __getattr__ proxy.",
+          "Check the rewind_body function to ensure it correctly handles non-seekable bodies.",
+          "Inspect the SessionRedirectMixin to confirm that it properly handles body rewinding during redirects.",
+          "Validate that the prepare_body function correctly records the body position for rewinding."
+        ],
+        "test_plan": [
+          "Simulate a redirect scenario with a seekable body and verify that the body is correctly rewound.",
+          "Simulate a redirect scenario with a non-seekable body (e.g., wrapped by tqdm.wrapattr) and check if the body becomes empty.",
+          "Test the behavior with different types of bodies (file, generator, iterator) to ensure proper handling."
+        ],
+        "evidence_files": [
+          "src/requests/utils.py",
+          "src/requests/sessions.py",
+          "src/requests/models.py"
+        ],
+        "tool_trace": [
+          {
+            "name": "read_file",
+            "arguments": {
+              "path": "src/requests/utils.py",
+              "start_line": 1139,
+              "end_line": 1155
+            },
+            "output_characters": 1030,
+            "returned_error": false,
+            "observed_ranges": [
+              {
+                "file_path": "src/requests/utils.py",
+                "start_line": 1139,
+                "end_line": 1155
+              }
+            ]
+          },
+          {
+            "name": "find_symbol",
+            "arguments": {
+              "name": "SessionRedirectMixin"
+            },
+            "output_characters": 11764,
+            "returned_error": false,
+            "observed_ranges": [
+              {
+                "file_path": "src/requests/sessions.py",
+                "start_line": 127,
+                "end_line": 392
+              },
+              {
+                "file_path": "src/requests/sessions.py",
+                "start_line": 132,
+                "end_line": 132
+              },
+              {
+                "file_path": "src/requests/sessions.py",
+                "start_line": 134,
+                "end_line": 152
+              },
+              {
+                "file_path": "src/requests/sessions.py",
+                "start_line": 154,
+                "end_line": 184
+              },
+              {
+                "file_path": "src/requests/sessions.py",
+                "start_line": 186,
+                "end_line": 307
+              },
+              {
+                "file_path": "src/requests/sessions.py",
+                "start_line": 309,
+                "end_line": 332
+              },
+              {
+                "file_path": "src/requests/sessions.py",
+                "start_line": 334,
+                "end_line": 368
+              },
+              {
+                "file_path": "src/requests/sessions.py",
+                "start_line": 370,
+                "end_line": 392
+              }
+            ]
+          },
+          {
+            "name": "read_file",
+            "arguments": {
+              "path": "src/requests/models.py",
+              "start_line": 574,
+              "end_line": 650
+            },
+            "output_characters": 3676,
+            "returned_error": false,
+            "observed_ranges": [
+              {
+                "file_path": "src/requests/models.py",
+                "start_line": 574,
+                "end_line": 650
+              }
+            ]
+          }
+        ],
+        "limitation": null,
+        "review_required": false,
+        "original_output_text": null,
+        "translation_note": null
+      }
+    },
+    {
+      "issue_id": "psf/requests#PR7309",
+      "repository": "psf/requests",
+      "revision": "7407309c8a8a73aa2f4337184025d440bbedab7a",
+      "elapsed_seconds": 5.986,
+      "initial_recall_at_3": 1.0,
+      "cited_recall_at_3": 1.0,
+      "result": {
+        "issue_text": "get_encoding_from_headers fails with AttributeError: bool object has no attribute strip for Content-Type: text/html; charset. Expected behavior is the ordinary text fallback encoding when charset has no value.",
+        "status": "complete",
+        "root_cause_hypothesis": "The error occurs because the 'charset' parameter in the Content-Type header is being treated as a string, and when it's not present, the code attempts to use the 'text' type to return 'ISO-8859-1', which may not be the correct fallback encoding when charset is missing.",
+        "investigation_steps": [
+          "Verify the logic for extracting the 'charset' parameter from the Content-Type header.",
+          "Check how the 'text' type is being used as a fallback when 'charset' is not present.",
+          "Ensure that the 'text' type is correctly mapped to a standard encoding like 'ISO-8859-1' or 'UTF-8' when no charset is specified."
+        ],
+        "test_plan": [
+          "Run unit tests that simulate a Content-Type header without a 'charset' parameter to ensure the correct fallback encoding is used.",
+          "Test scenarios where 'text' is present in the Content-Type header but no 'charset' is specified.",
+          "Validate that the 'text' type is correctly mapped to a standard encoding when no charset is provided."
+        ],
+        "evidence_files": [
+          "src/requests/utils.py",
+          "tests/test_utils.py"
+        ],
+        "tool_trace": [
+          {
+            "name": "read_file",
+            "arguments": {
+              "path": "src/requests/utils.py",
+              "start_line": 529,
+              "end_line": 551
+            },
+            "output_characters": 966,
+            "returned_error": false,
+            "observed_ranges": [
+              {
+                "file_path": "src/requests/utils.py",
+                "start_line": 529,
+                "end_line": 551
+              }
+            ]
+          },
+          {
+            "name": "find_symbol",
+            "arguments": {
+              "name": "get_encoding_from_headers"
+            },
+            "output_characters": 1153,
+            "returned_error": false,
+            "observed_ranges": [
+              {
+                "file_path": "src/requests/utils.py",
+                "start_line": 529,
+                "end_line": 551
+              },
+              {
+                "file_path": "tests/test_utils.py",
+                "start_line": 651,
+                "end_line": 652
+              }
+            ]
+          }
+        ],
+        "limitation": null,
+        "review_required": false,
+        "original_output_text": null,
+        "translation_note": null
+      }
+    },
+    {
+      "issue_id": "psf/requests#PR7308",
+      "repository": "psf/requests",
+      "revision": "7407309c8a8a73aa2f4337184025d440bbedab7a",
+      "elapsed_seconds": 7.304,
+      "initial_recall_at_3": 0.0,
+      "cited_recall_at_3": 0.0,
+      "result": {
+        "issue_text": "A header name or value ending in a newline escapes Requests header validation and produces an inconsistent lower-level exception. Header preparation should reject this with InvalidHeader, for bytes and strings.",
+        "status": "complete",
+        "root_cause_hypothesis": "The issue may be related to the header validation logic in the requests library, which might not properly handle headers ending with a newline, leading to inconsistent exceptions.",
+        "investigation_steps": [
+          "Inspect the header validation logic in the requests library to understand how it processes headers.",
+          "Check the implementation of the `HEADER_VALIDATORS` and related functions to see how they handle headers with trailing newlines.",
+          "Verify if the `InvalidHeader` exception is raised correctly for such cases."
+        ],
+        "test_plan": [
+          "Create a test case that sends a request with a header ending in a newline and check if `InvalidHeader` is raised.",
+          "Validate the header validation logic by inspecting the `HEADER_VALIDATORS_BYTE` and `HEADER_VALIDATORS_STR` functions to ensure they handle such cases appropriately."
+        ],
+        "evidence_files": [
+          "src/requests/utils.py",
+          "src/requests/exceptions.py",
+          "src/requests/models.py",
+          "src/requests/cookies.py"
+        ],
+        "tool_trace": [
+          {
+            "name": "read_file",
+            "arguments": {
+              "path": "src/requests/utils.py",
+              "start_line": 1,
+              "end_line": 1086
+            },
+            "output_characters": 7686,
+            "returned_error": false,
+            "observed_ranges": [
+              {
+                "file_path": "src/requests/utils.py",
+                "start_line": 1,
+                "end_line": 200
+              }
+            ]
+          },
+          {
+            "name": "find_symbol",
+            "arguments": {
+              "name": "HEADER_VALIDATORS"
+            },
+            "output_characters": 2,
+            "returned_error": false,
+            "observed_ranges": []
+          }
+        ],
+        "limitation": null,
+        "review_required": false,
+        "original_output_text": null,
+        "translation_note": null
+      }
+    },
+    {
+      "issue_id": "psf/requests#PR7425",
+      "repository": "psf/requests",
+      "revision": "dc9dbdfb3434c6e58d48fd102f93e5342308817e",
+      "elapsed_seconds": 10.779,
+      "initial_recall_at_3": 1.0,
+      "cited_recall_at_3": 1.0,
+      "result": {
+        "issue_text": "Type checking rejects a single response hook callable passed to Session.request, even though Request accepts that hook form and it works at runtime. The hooks input annotation should be consistent across the public request APIs.",
+        "status": "complete",
+        "root_cause_hypothesis": "The issue arises from a type inconsistency between the `HooksInputType` and `HookType` definitions in the `_types.py` module. The `HooksInputType` is defined as a `Mapping[str, Iterable[HookType] | HookType]`, but the `HookType` is a `Callable[[\"Response\"], Any]`. When a single callable is passed to `Session.request`, it is treated as a list, but type checking enforces that the input must be a mapping, leading to a type rejection.",
+        "investigation_steps": [
+          "Verify the type definitions for `HookType` and `HooksInputType` in `_types.py` to ensure consistency.",
+          "Examine the `dispatch_hook` function in `hooks.py` to confirm how it handles single callable inputs.",
+          "Check the `merge_hooks` function in `sessions.py` to ensure it correctly merges hooks from both request and session levels."
+        ],
+        "test_plan": [
+          "Create a test case where a single callable is passed to `Session.request` and verify that it is accepted at runtime but rejected by type checking.",
+          "Modify the type definitions to ensure `HooksInputType` accepts both mappings and single callables consistently.",
+          "Run the test case again after modifying the type definitions to confirm the issue is resolved."
+        ],
+        "evidence_files": [
+          "src/requests/hooks.py",
+          "src/requests/_types.py",
+          "src/requests/sessions.py"
+        ],
+        "tool_trace": [
+          {
+            "name": "read_file",
+            "arguments": {
+              "path": "src/requests/hooks.py",
+              "start_line": 1,
+              "end_line": 48
+            },
+            "output_characters": 1535,
+            "returned_error": false,
+            "observed_ranges": [
+              {
+                "file_path": "src/requests/hooks.py",
+                "start_line": 1,
+                "end_line": 48
+              }
+            ]
+          },
+          {
+            "name": "find_symbol",
+            "arguments": {
+              "name": "dispatch_hook"
+            },
+            "output_characters": 763,
+            "returned_error": false,
+            "observed_ranges": [
+              {
+                "file_path": "src/requests/hooks.py",
+                "start_line": 32,
+                "end_line": 48
+              }
+            ]
+          },
+          {
+            "name": "read_file",
+            "arguments": {
+              "path": "src/requests/_types.py",
+              "start_line": 1,
+              "end_line": 176
+            },
+            "output_characters": 6891,
+            "returned_error": false,
+            "observed_ranges": [
+              {
+                "file_path": "src/requests/_types.py",
+                "start_line": 1,
+                "end_line": 176
+              }
+            ]
+          },
+          {
+            "name": "read_file",
+            "arguments": {
+              "path": "src/requests/sessions.py",
+              "start_line": 1,
+              "end_line": 913
+            },
+            "output_characters": 8211,
+            "returned_error": false,
+            "observed_ranges": [
+              {
+                "file_path": "src/requests/sessions.py",
+                "start_line": 1,
+                "end_line": 200
+              }
+            ]
+          }
+        ],
+        "limitation": null,
+        "review_required": false,
+        "original_output_text": null,
+        "translation_note": null
+      }
+    }
+  ]
+}

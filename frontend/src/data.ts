@@ -19,6 +19,23 @@ const resultSchema = z.object({
   issue_text: z.string(),
   status: z.enum(['complete', 'incomplete']),
   initial_context: contextSchema,
+  evidence_status: z.enum(['unchecked', 'verified', 'insufficient']).default('unchecked'),
+  evidence_checks: z.array(z.string()).default([]),
+  successful_reads: z.number().int().nonnegative().default(0),
+  uncertainties: z.array(z.string()).default([]),
+  citations: z
+    .array(
+      z.object({
+        file_path: z.string(),
+        start_line: z.number().int().positive(),
+        end_line: z.number().int().positive(),
+        reason: z.string(),
+        verified: z.boolean(),
+        problems: z.array(z.string()).default([]),
+        content: z.string().default(''),
+      }),
+    )
+    .default([]),
   root_cause_hypothesis: z.string().nullable().optional(),
   investigation_steps: z.array(z.string()).default([]),
   test_plan: z.array(z.string()).default([]),
@@ -36,6 +53,8 @@ const resultSchema = z.object({
   review_required: z.boolean().default(false),
   original_output_text: z.string().nullable().optional(),
   translation_note: z.string().nullable().optional(),
+  draft_output_text: z.string().nullable().optional(),
+  synthesis_note: z.string().nullable().optional(),
 })
 export const indexSchema = z.object({
   repository: z.string(),
@@ -116,7 +135,12 @@ export function collectEvidence(result: Investigation): Evidence[] {
         start: typeof item.start_line === 'number' ? item.start_line : 1,
         end: typeof item.end_line === 'number' ? item.end_line : 1,
         content: tool.name === 'read_file' ? item.content.replace(/^\d+: ?/gm, '') : item.content,
-        origin: tool.name === 'read_file' ? '工具读取' : '工具检索',
+        origin:
+          tool.name === 'read_file'
+            ? '工具读取'
+            : tool.name === 'find_callers'
+              ? '候选调用方'
+              : '工具检索',
         truncated: item.content_truncated === true,
       })
     }
@@ -167,4 +191,18 @@ export async function api<T>(path: string, body?: unknown): Promise<T> {
     throw new Error(`请求失败（${response.status}）：${detail}`)
   }
   return data as T
+}
+
+export function explainEvidenceCheck(code: string): string {
+  const labels: Record<string, string> = {
+    no_source_read: '模型没有成功读取源码',
+    missing_citations: '模型没有提供具体行号引用',
+    citation_file_not_listed: '引用文件与报告的文件列表不一致',
+    invalid_line_range: '引用行号超出文件范围或顺序错误',
+    citation_range_too_large: '引用范围过大，需要缩小到相关代码',
+    citation_not_read: '引用包含模型未实际读到的行',
+    uncited_evidence_file: '部分文件缺少通过检查的具体引用',
+    no_implementation_citation: '缺少通过检查的 Python 实现代码引用',
+  }
+  return labels[code] ?? code
 }

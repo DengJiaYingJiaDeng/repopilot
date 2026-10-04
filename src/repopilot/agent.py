@@ -8,6 +8,7 @@ from typing import Any, Literal, Protocol
 from pydantic import BaseModel, Field, ValidationError
 
 from repopilot.domain import AnalysisResult, IndexNotReadyError, ModelProviderError
+from repopilot.evidence import CheckedCitation, Citation, assess_evidence
 from repopilot.openai_client import create_openai_client
 from repopilot.service import RepoPilotService
 
@@ -25,6 +26,8 @@ class ModelTurn:
     output_text: str
     original_output_text: str | None = None
     translation_note: str | None = None
+    draft_output_text: str | None = None
+    synthesis_note: str | None = None
 
 
 class InvestigationModel(Protocol):
@@ -86,6 +89,8 @@ class SymbolArguments(BaseModel):
 
 
 class FinalAnswer(BaseModel):
+    citations: list[Citation] = Field(default_factory=list, max_length=12)
+    uncertainties: list[str] = Field(default_factory=list, max_length=10)
     root_cause_hypothesis: str = Field(min_length=1)
     investigation_steps: list[str] = Field(min_length=1)
     test_plan: list[str] = Field(min_length=1)
@@ -99,6 +104,11 @@ class ToolTrace(BaseModel):
 
 
 class InvestigationResult(BaseModel):
+    citations: list[CheckedCitation] = Field(default_factory=list)
+    uncertainties: list[str] = Field(default_factory=list)
+    evidence_status: Literal["unchecked", "verified", "insufficient"] = "unchecked"
+    evidence_checks: list[str] = Field(default_factory=list)
+    successful_reads: int = 0
     issue_text: str
     status: Literal["complete", "incomplete"]
     initial_context: AnalysisResult
@@ -111,6 +121,8 @@ class InvestigationResult(BaseModel):
     review_required: bool = False
     original_output_text: str | None = None
     translation_note: str | None = None
+    draft_output_text: str | None = None
+    synthesis_note: str | None = None
 
 
 CHINESE_OUTPUT_PREFIX = (
@@ -127,7 +139,20 @@ if you cannot locate it, explicitly say the root cause is not established.
 Never claim to have run code or tests.
 Finish with a single JSON object with keys root_cause_hypothesis (a tentative explanation),
 investigation_steps (array), test_plan (array), evidence_files (array of paths seen in tools).
-If evidence is weak, say so in the hypothesis. Return only JSON, no markdown fences."""
+Trace the data/control flow: inspect the actual branch or expression, then inspect relevant
+callers with find_callers only when caller behavior matters. Use it at most once; do not
+recursively follow generic setup methods. Prefer reading a helper definition when it creates
+the failing value. After find_symbol, use read_file on the implementation.
+Caller matches are candidates,
+not proof of dispatch. Read the relevant caller implementation before attributing its behavior.
+Do not stop at docstrings or similar tests. Use find_symbol and narrow read_file ranges when a
+long class/module hides the implementation. Reserve calls to read the final supporting lines.
+Also return citations: [{"file_path": "relative/path.py", "start_line": 1, "end_line": 3,
+"reason": "How these lines support the tentative explanation"}]. Cite narrow ranges actually
+returned by read_file. Every evidence_files entry must have at least one citation. Do not list
+files merely because search returned them. Include uncertainties (an array) for missing links.
+If evidence is weak, explicitly say the cause is not established; never fill gaps with guesses.
+Return only JSON, no markdown fences."""
 
 TOOL_SCHEMAS: list[dict[str, Any]] = [
     {
@@ -178,6 +203,23 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
         "strict": True,
     },
 ]
+TOOL_SCHEMAS.append(
+    {
+        "type": "function",
+        "name": "find_callers",
+        "description": (
+            "Find possible Python callers by function/method name. Name-based candidates, "
+            "not resolved runtime dispatch. Read returned source paths to verify."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {"name": {"type": "string"}},
+            "required": ["name"],
+            "additionalProperties": False,
+        },
+        "strict": True,
+    }
+)
 
 
 def _compact_matches(matches: list[Any]) -> str:
@@ -249,6 +291,13 @@ class Investigator:
                     },
                     ensure_ascii=False,
                 )
+            if name == "find_callers":
+                caller_request = SymbolArguments.model_validate(args)
+                matches = self.service.find_callers(caller_request.name)
+                return caller_request.model_dump(), json.dumps(
+                    [item.model_dump() for item in matches],
+                    ensure_ascii=False,
+                )
             if name == "find_symbol":
                 symbol_request = SymbolArguments.model_validate(args)
                 return symbol_request.model_dump(), _compact_matches(
@@ -312,7 +361,7 @@ class Investigator:
                         file_output = json.loads(output)
                         if "error" not in file_output:
                             seen_files.add(str(file_output["file_path"]))
-                    elif call.name in {"search_code", "find_symbol"}:
+                    elif call.name in {"search_code", "find_symbol", "find_callers"}:
                         try:
                             seen_files.update(item["file_path"] for item in json.loads(output))
                         except (ValueError, TypeError, KeyError):
@@ -342,12 +391,23 @@ class Investigator:
                     tool_trace=trace,
                     limitation="Model cited a file absent from observed evidence",
                 )
+            assessment = assess_evidence(
+                self.service, answer.citations, answer.evidence_files, trace
+            )
             return InvestigationResult(
+                citations=assessment.citations,
+                uncertainties=answer.uncertainties,
+                evidence_status=assessment.status,
+                evidence_checks=assessment.checks,
+                successful_reads=assessment.successful_reads,
+                review_required=assessment.status != "verified" or bool(answer.uncertainties),
                 issue_text=issue_text,
                 status="complete",
                 initial_context=initial,
                 original_output_text=turn.original_output_text,
                 translation_note=turn.translation_note,
+                draft_output_text=turn.draft_output_text,
+                synthesis_note=turn.synthesis_note,
                 root_cause_hypothesis=answer.root_cause_hypothesis,
                 investigation_steps=answer.investigation_steps,
                 test_plan=answer.test_plan,

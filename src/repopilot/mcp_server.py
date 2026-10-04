@@ -11,7 +11,7 @@ from repopilot.service import RepoPilotService
 
 
 def create_mcp_server(repository: Path, settings: Settings | None = None) -> MCPServer:
-    """Index a bounded repository snapshot and register three read-only tools."""
+    """Index a bounded repository snapshot and register four read-only tools."""
     config = settings or Settings(allowed_root=repository.resolve().parent)
     service = RepoPilotService(config)
     service.index(repository)
@@ -52,6 +52,11 @@ def create_mcp_server(repository: Path, settings: Settings | None = None) -> MCP
             }
             for item in service.find_symbol(name, 10)
         ]
+
+    @server.tool()
+    def find_callers(name: str) -> list[dict[str, Any]]:
+        """Find candidate Python call sites by name; receiver types and aliases are unresolved."""
+        return [item.model_dump() for item in service.find_callers(name)]
 
     return server
 

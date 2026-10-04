@@ -13,7 +13,7 @@ Issue reports describe symptoms; the related code can be spread across modules, 
 - Keyword and BM25 retrieval; optional embedding cosine search, BM25/vector reciprocal-rank fusion, and cross-encoder reranking.
 - File-level Recall@K and MRR@K evaluation from JSONL labels, including a five-issue [Click benchmark](evaluation/README.md) at a pinned pre-fix revision.
 - FastAPI endpoints for indexing, search, context analysis, and bounded LLM investigation through a local model or optional OpenAI provider.
-- A read-only three-tool MCP server; an optional LangGraph workflow that routes incomplete investigations to review.
+- A read-only four-tool MCP server; an optional LangGraph workflow that routes incomplete or insufficiently grounded investigations to review.
 - Ruff, strict mypy, pytest, GitHub Actions, and a default Docker image that requires no model key.
 
 ## Architecture
@@ -29,9 +29,13 @@ issue text -> keyword / BM25 / optional vector + hybrid + reranker
                             optional LangGraph routing
 ```
 
-`CodeChunk` keeps repository-relative path, symbol, source, and line range. Retriever implementations share `index` and `search`. The model can only call `search_code`, `read_file`, and `find_symbol` against the indexed snapshot. The loop caps tool calls and rejects cited files absent from observed evidence. A hypothesis remains unverified until a developer checks the code and runs tests.
+`CodeChunk` keeps repository-relative path, symbol, source, and line range. Retriever implementations share `index` and `search`. The model can only call `search_code`, `read_file`, `find_symbol`, and `find_callers` against the indexed snapshot. The loop caps tool calls and rejects cited files absent from observed evidence. A hypothesis remains unverified until a developer checks the code and runs tests.
 
-## Visual workbench (v0.8)
+## V2: source evidence and paired evaluation
+
+V0.9 adds Python caller candidates, line-by-line citation provenance checks, explicit uncertainty/review states, and a bounded structured synthesis step for the local model. Ten pinned Click/Requests cases compare the original and updated investigation pipeline. See the [V2 results and limitations](evaluation/V2_REPORT.md). Citation verification is **not** root-cause verification.
+
+## Visual workbench (v0.9)
 
 An independent React/TypeScript frontend turns investigation JSON into four views: **summary, code evidence, tool-call timeline, and proposed tests**. It supports local JSON import/export and live investigations through FastAPI. New investigations can request Chinese prose; historical/imported output is kept unchanged.
 
@@ -128,7 +132,7 @@ python -m pip install -e ".[mcp]"
 python -m repopilot.mcp_server /absolute/path/to/workspace/project
 ```
 
-This starts a local stdio MCP server with `search_code`, `read_file`, and `find_symbol`. It indexes one repository on launch. Standard output is reserved for MCP protocol messages. The tools read only the snapshot; they do not execute shell commands or modify files.
+This starts a local stdio MCP server with `search_code`, `read_file`, `find_symbol`, and `find_callers`. It indexes one repository on launch. Standard output is reserved for MCP protocol messages. The tools read only the snapshot; they do not execute shell commands or modify files.
 
 ## Evaluation
 
@@ -163,10 +167,10 @@ Offline tests use fake embedding and model providers where needed. Live Qwen and
 ## Docker
 
 ```bash
-docker build -t repopilot:0.8 .
+docker build -t repopilot:0.9 .
 docker run --rm -p 127.0.0.1:8000:8000 \
   -v /absolute/path/to/workspace:/workspace:ro \
-  -e REPOPILOT_ALLOWED_ROOT=/workspace repopilot:0.8
+  -e REPOPILOT_ALLOWED_ROOT=/workspace repopilot:0.9
 ```
 
 Use `/workspace/project` for the index request in the container. If PyPI is slow, pass `--build-arg PIP_INDEX_URL=<trusted-index>` during build. The default image includes lexical retrieval and the API; install optional extras in a custom image for model or MCP features. The server has no authentication and should stay bound to localhost.
