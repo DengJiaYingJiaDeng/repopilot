@@ -1,6 +1,8 @@
+from importlib import import_module
 from pathlib import Path
 
 from fastapi.testclient import TestClient
+from pytest import MonkeyPatch
 
 from repopilot.api.app import create_app
 from repopilot.config import Settings
@@ -39,7 +41,7 @@ def test_api_rejects_repository_outside_boundary(tmp_path: Path) -> None:
     assert response.status_code == 400
 
 
-def test_investigate_api_with_fake_model() -> None:
+def test_investigate_api_with_fake_model(monkeypatch: MonkeyPatch) -> None:
     import json
 
     from pydantic import SecretStr
@@ -61,6 +63,9 @@ def test_investigate_api_with_fake_model() -> None:
             }
             return ModelTurn("1", [], json.dumps(answer))
 
+    api_module = import_module("repopilot.api.app")
+    monkeypatch.setattr(api_module, "OpenAIInvestigationModel", lambda key, model: FinalModel())
+
     app = create_app(
         Settings(
             allowed_root=FIXTURE.parent,
@@ -69,7 +74,6 @@ def test_investigate_api_with_fake_model() -> None:
             investigation_workflow="langgraph",
         )
     )
-    app.state.investigator.model = FinalModel()
     client = TestClient(app)
     assert client.post("/repositories/index", json={"path": str(FIXTURE)}).status_code == 200
     response = client.post("/investigate", json={"issue_text": "environment config failure"})
