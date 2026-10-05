@@ -1,9 +1,13 @@
 import hashlib
 import json
+import runpy
+from pathlib import Path
 
 import pytest
 
-from scripts.compare_read_coverage import compare_read_coverage
+compare_read_coverage = runpy.run_path(
+    str(Path(__file__).resolve().parents[1] / "scripts" / "compare_read_coverage.py")
+)["compare_read_coverage"]
 
 
 def test_read_coverage_counts_only_successful_complete_observations() -> None:
