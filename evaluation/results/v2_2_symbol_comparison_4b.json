@@ -1,0 +1,97 @@
+{
+  "scope": "Paired development runs; source-range checks are not root-cause accuracy.",
+  "before": {
+    "cases": 10,
+    "protocol_complete": 10,
+    "reports_with_verified_ranges": 10,
+    "verified_citations": 26,
+    "total_citations": 26,
+    "mean_initial_file_recall_at_3": 0.75,
+    "mean_cited_file_recall_at_3": 0.65,
+    "median_seconds": 14.0395,
+    "mean_tool_calls": 3.5
+  },
+  "after": {
+    "cases": 10,
+    "protocol_complete": 10,
+    "reports_with_verified_ranges": 10,
+    "verified_citations": 20,
+    "total_citations": 20,
+    "mean_initial_file_recall_at_3": 0.75,
+    "mean_cited_file_recall_at_3": 0.9,
+    "median_seconds": 14.174,
+    "mean_tool_calls": 4.0
+  },
+  "cases": [
+    {
+      "issue_id": "pallets/click#3019",
+      "before_status": "complete",
+      "after_status": "complete",
+      "after_evidence": "verified",
+      "after_checks": []
+    },
+    {
+      "issue_id": "pallets/click#2952",
+      "before_status": "complete",
+      "after_status": "complete",
+      "after_evidence": "verified",
+      "after_checks": []
+    },
+    {
+      "issue_id": "pallets/click#2836",
+      "before_status": "complete",
+      "after_status": "complete",
+      "after_evidence": "verified",
+      "after_checks": []
+    },
+    {
+      "issue_id": "pallets/click#3015",
+      "before_status": "complete",
+      "after_status": "complete",
+      "after_evidence": "verified",
+      "after_checks": []
+    },
+    {
+      "issue_id": "pallets/click#3043",
+      "before_status": "complete",
+      "after_status": "complete",
+      "after_evidence": "verified",
+      "after_checks": []
+    },
+    {
+      "issue_id": "psf/requests#PR7502",
+      "before_status": "complete",
+      "after_status": "complete",
+      "after_evidence": "verified",
+      "after_checks": []
+    },
+    {
+      "issue_id": "psf/requests#PR7433",
+      "before_status": "complete",
+      "after_status": "complete",
+      "after_evidence": "verified",
+      "after_checks": []
+    },
+    {
+      "issue_id": "psf/requests#PR7309",
+      "before_status": "complete",
+      "after_status": "complete",
+      "after_evidence": "verified",
+      "after_checks": []
+    },
+    {
+      "issue_id": "psf/requests#PR7308",
+      "before_status": "complete",
+      "after_status": "complete",
+      "after_evidence": "verified",
+      "after_checks": []
+    },
+    {
+      "issue_id": "psf/requests#PR7425",
+      "before_status": "complete",
+      "after_status": "complete",
+      "after_evidence": "verified",
+      "after_checks": []
+    }
+  ]
+}

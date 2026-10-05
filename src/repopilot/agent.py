@@ -145,7 +145,10 @@ investigation_steps (array), test_plan (array), evidence_files (array of paths s
 Trace the data/control flow: inspect the actual branch or expression, then inspect relevant
 callers with find_callers only when caller behavior matters. Use it at most once; do not
 recursively follow generic setup methods. Prefer reading a helper definition when it creates
-the failing value. After find_symbol, use read_file on the implementation.
+the failing value. For a field or constant that determines the failing branch, use
+find_symbol on its name to locate assignments and imports; read the relevant definition.
+After find_symbol, use read_file on the implementation. An assignment candidate alone
+does not prove which runtime write supplied the value.
 Caller matches are candidates,
 not proof of dispatch. Read the relevant caller implementation before attributing its behavior.
 Do not stop at docstrings or similar tests. Use find_symbol and narrow read_file ranges when a
@@ -196,7 +199,10 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
     {
         "type": "function",
         "name": "find_symbol",
-        "description": "Find indexed Python symbols by name",
+        "description": (
+            "Find Python functions, classes, assignments, and import sites by name; "
+            "read the returned source before inferring behavior"
+        ),
         "parameters": {
             "type": "object",
             "properties": {"name": {"type": "string"}},
@@ -231,6 +237,7 @@ def _compact_matches(matches: list[Any]) -> str:
             {
                 "file_path": item.chunk.file_path,
                 "symbol": item.chunk.symbol_name,
+                "kind": item.chunk.symbol_type,
                 "start_line": item.chunk.start_line,
                 "end_line": item.chunk.end_line,
                 "score": item.score,

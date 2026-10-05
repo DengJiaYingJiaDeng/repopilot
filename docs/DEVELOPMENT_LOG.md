@@ -103,3 +103,12 @@ The current tokenizer uses English letters and digits, with underscore and camel
 - Corrected `read_file` so its returned `end_line` reflects only complete source lines under the 8,000-character output cap. Continuation flags now describe only an incompletely returned requested range; a short read no longer advertises the rest of the file as a continuation.
 - The final boundary-only run yielded 10/10 protocol-complete and provenance-complete reports, but cited-file Recall@3 was 0.65 versus V2's 0.70. This is a tool-output correctness fix, not an accuracy improvement. See `evaluation/V2_1_REPORT.md` for the runs and limitations.
 - Local verification: 73 Python tests, Ruff, and mypy. The frontend was unchanged; its existing 7 tests and production build remained the prior validated state.
+
+## v0.9 follow-up — AST symbol sites and model-size check (2026-10-05)
+
+- Audited the 0.70 → 0.65 cited-file Recall@3 drop: only Click #2836 changed, missing one of its two labeled files. The 0.05 difference is one case's 0.5 loss divided by ten; one run per variant does not establish a trend.
+- Indexed assignment and import locations from the same trusted Python snapshot as functions/classes. `find_symbol` now exposes type, path and line range for constants, type aliases and attribute writes, including `self.` lookups. A candidate write remains distinct from the value selected at runtime.
+- On the ten-case development set with local Qwen3-4B, initial file recall stayed 0.75; actual-read and cited-file Recall@3 rose from 0.65 to 0.90. Protocol and citation provenance passed 10/10, median latency changed 14.04s → 14.17s and mean calls 3.5 → 4.0. Root-cause explanations remained wrong in several cases; file recall is not diagnosis accuracy.
+- Compared Qwen3-8B Q4_K_M against Qwen3-4B Q4_K_M on identical source digest, case set, pinned target revisions and agent settings. 8B yielded cited-file Recall@3 0.75, mean 1.9 tool calls and median 17.64s, versus 4B's 0.90, 4.0 and 14.17s. The 8B run frequently stopped after one read and missed causal branches. Both results are single runs on the development set; neither supports a general model ranking.
+- Kept 4B as the workbench default. The next honest accuracy milestone is an independent issue set with a root-cause rubric and explicit checking of value origins and downstream branches. See `evaluation/V2_2_REPORT.md`.
+- Verification: 76 Python tests, Ruff lint/format, strict mypy, 7 frontend tests and a production frontend build passed. Full model traces and weight files remain outside Git.

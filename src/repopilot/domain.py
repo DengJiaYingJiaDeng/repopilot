@@ -4,7 +4,9 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-SymbolType = Literal["module", "class", "function", "async_function", "markdown_section"]
+SymbolType = Literal[
+    "module", "class", "function", "async_function", "markdown_section", "assignment", "import"
+]
 
 
 class CodeChunk(BaseModel):

@@ -39,6 +39,10 @@ V0.9 adds Python caller candidates, line-by-line citation provenance checks, exp
 
 A later experiment tested automatic reads of functions named in draft explanations. Results varied across implementation variants and did not establish a reliable recall or diagnosis gain, so the automatic heuristic was withdrawn. The retained change makes `read_file` report only complete returned lines and gives continuation markers only when the requested range is incomplete. The [follow-up report](evaluation/V2_1_REPORT.md) includes all runs, failure cases, and a separate metric for files actually read.
 
+## Follow-up: locating value definitions
+
+`find_symbol` now indexes Python assignments and import sites as well as functions and classes, so a report can follow values such as header validators or request-body positions. Candidate sites require source inspection; they do not establish which runtime write caused a bug. In the 10-case development set, files actually read and cited rose from 0.65 to 0.90 Recall@3, while a source audit still found incorrect causal explanations. See the [symbol navigation results](evaluation/V2_2_REPORT.md).
+
 ## Visual workbench (v0.9)
 
 An independent React/TypeScript frontend turns investigation JSON into four views: **summary, code evidence, tool-call timeline, and proposed tests**. It supports local JSON import/export and live investigations through FastAPI. New investigations can request Chinese prose; historical/imported output is kept unchanged.

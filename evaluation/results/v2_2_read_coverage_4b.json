@@ -1,0 +1,163 @@
+{
+  "dataset_sha256": "476fa9877005bfddf1508b64a48f37e59f16df0283a57b55b895d1ff3957a161",
+  "runs": [
+    {
+      "source_digest": "631f86a654036f2180893779ed4404b1bc8c1e26cfb8e6f4de0acb0d0fd3ae8b",
+      "mean_read_recall_at_3": 0.65,
+      "cases": [
+        {
+          "issue_id": "pallets/click#3019",
+          "read_files": [
+            "src/click/termui.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "pallets/click#2952",
+          "read_files": [
+            "src/click/core.py"
+          ],
+          "read_recall_at_3": 0.5
+        },
+        {
+          "issue_id": "pallets/click#2836",
+          "read_files": [
+            "src/click/core.py"
+          ],
+          "read_recall_at_3": 0.5
+        },
+        {
+          "issue_id": "pallets/click#3015",
+          "read_files": [
+            "src/click/types.py",
+            "src/click/core.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "pallets/click#3043",
+          "read_files": [
+            "src/click/shell_completion.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "psf/requests#PR7502",
+          "read_files": [
+            "src/requests/models.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "psf/requests#PR7433",
+          "read_files": [
+            "src/requests/utils.py",
+            "src/requests/sessions.py"
+          ],
+          "read_recall_at_3": 0.0
+        },
+        {
+          "issue_id": "psf/requests#PR7309",
+          "read_files": [
+            "src/requests/utils.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "psf/requests#PR7308",
+          "read_files": [
+            "src/requests/utils.py"
+          ],
+          "read_recall_at_3": 0.0
+        },
+        {
+          "issue_id": "psf/requests#PR7425",
+          "read_files": [
+            "src/requests/sessions.py"
+          ],
+          "read_recall_at_3": 0.5
+        }
+      ]
+    },
+    {
+      "source_digest": "c0daea59b775b34e34b3e2795fbaaabd1c163b54ea12d5f8405eab21e643d4e6",
+      "mean_read_recall_at_3": 0.9,
+      "cases": [
+        {
+          "issue_id": "pallets/click#3019",
+          "read_files": [
+            "src/click/termui.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "pallets/click#2952",
+          "read_files": [
+            "src/click/core.py"
+          ],
+          "read_recall_at_3": 0.5
+        },
+        {
+          "issue_id": "pallets/click#2836",
+          "read_files": [
+            "src/click/core.py",
+            "src/click/termui.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "pallets/click#3015",
+          "read_files": [
+            "src/click/types.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "pallets/click#3043",
+          "read_files": [
+            "src/click/shell_completion.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "psf/requests#PR7502",
+          "read_files": [
+            "src/requests/models.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "psf/requests#PR7433",
+          "read_files": [
+            "src/requests/utils.py",
+            "src/requests/models.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "psf/requests#PR7309",
+          "read_files": [
+            "src/requests/utils.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "psf/requests#PR7308",
+          "read_files": [
+            "src/requests/utils.py",
+            "src/requests/_internal_utils.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "psf/requests#PR7425",
+          "read_files": [
+            "src/requests/sessions.py",
+            "src/requests/hooks.py"
+          ],
+          "read_recall_at_3": 0.5
+        }
+      ]
+    }
+  ]
+}

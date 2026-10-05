@@ -26,6 +26,7 @@ async def test_mcp_search_read_and_symbol_tools() -> None:
         symbols = await client.call_tool("find_symbol", {"name": "start_mcp"})
         assert symbols.structured_content is not None
         assert symbols.structured_content["result"][0]["symbol"].endswith("start_mcp_server")
+        assert symbols.structured_content["result"][0]["kind"] == "async_function"
 
         callers = await client.call_tool("find_callers", {"name": "validate_server_config"})
         assert callers.structured_content is not None

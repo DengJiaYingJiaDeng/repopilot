@@ -1,0 +1,143 @@
+{
+  "dataset_sha256": "476fa9877005bfddf1508b64a48f37e59f16df0283a57b55b895d1ff3957a161",
+  "source_digest": "c0daea59b775b34e34b3e2795fbaaabd1c163b54ea12d5f8405eab21e643d4e6",
+  "settings": {
+    "method": "bm25",
+    "max_agent_calls": 6,
+    "response_language": "en"
+  },
+  "runs": [
+    {
+      "model": "qwen3-4b",
+      "cases": 10,
+      "protocol_complete": 10,
+      "provenance_verified": 10,
+      "mean_initial_file_recall_at_3": 0.75,
+      "mean_cited_file_recall_at_3": 0.9,
+      "median_seconds": 14.174,
+      "mean_tool_calls": 4.0
+    },
+    {
+      "model": "qwen3-8b",
+      "cases": 10,
+      "protocol_complete": 10,
+      "provenance_verified": 10,
+      "mean_initial_file_recall_at_3": 0.75,
+      "mean_cited_file_recall_at_3": 0.75,
+      "median_seconds": 17.6355,
+      "mean_tool_calls": 1.9
+    }
+  ],
+  "cases": [
+    {
+      "issue_id": "pallets/click#3019",
+      "qwen3-4b": {
+        "cited_recall_at_3": 1.0,
+        "status": "complete"
+      },
+      "qwen3-8b": {
+        "cited_recall_at_3": 1.0,
+        "status": "complete"
+      }
+    },
+    {
+      "issue_id": "pallets/click#2952",
+      "qwen3-4b": {
+        "cited_recall_at_3": 0.5,
+        "status": "complete"
+      },
+      "qwen3-8b": {
+        "cited_recall_at_3": 0.5,
+        "status": "complete"
+      }
+    },
+    {
+      "issue_id": "pallets/click#2836",
+      "qwen3-4b": {
+        "cited_recall_at_3": 1.0,
+        "status": "complete"
+      },
+      "qwen3-8b": {
+        "cited_recall_at_3": 0.5,
+        "status": "complete"
+      }
+    },
+    {
+      "issue_id": "pallets/click#3015",
+      "qwen3-4b": {
+        "cited_recall_at_3": 1.0,
+        "status": "complete"
+      },
+      "qwen3-8b": {
+        "cited_recall_at_3": 1.0,
+        "status": "complete"
+      }
+    },
+    {
+      "issue_id": "pallets/click#3043",
+      "qwen3-4b": {
+        "cited_recall_at_3": 1.0,
+        "status": "complete"
+      },
+      "qwen3-8b": {
+        "cited_recall_at_3": 1.0,
+        "status": "complete"
+      }
+    },
+    {
+      "issue_id": "psf/requests#PR7502",
+      "qwen3-4b": {
+        "cited_recall_at_3": 1.0,
+        "status": "complete"
+      },
+      "qwen3-8b": {
+        "cited_recall_at_3": 1.0,
+        "status": "complete"
+      }
+    },
+    {
+      "issue_id": "psf/requests#PR7433",
+      "qwen3-4b": {
+        "cited_recall_at_3": 1.0,
+        "status": "complete"
+      },
+      "qwen3-8b": {
+        "cited_recall_at_3": 1.0,
+        "status": "complete"
+      }
+    },
+    {
+      "issue_id": "psf/requests#PR7309",
+      "qwen3-4b": {
+        "cited_recall_at_3": 1.0,
+        "status": "complete"
+      },
+      "qwen3-8b": {
+        "cited_recall_at_3": 1.0,
+        "status": "complete"
+      }
+    },
+    {
+      "issue_id": "psf/requests#PR7308",
+      "qwen3-4b": {
+        "cited_recall_at_3": 1.0,
+        "status": "complete"
+      },
+      "qwen3-8b": {
+        "cited_recall_at_3": 0.0,
+        "status": "complete"
+      }
+    },
+    {
+      "issue_id": "psf/requests#PR7425",
+      "qwen3-4b": {
+        "cited_recall_at_3": 0.5,
+        "status": "complete"
+      },
+      "qwen3-8b": {
+        "cited_recall_at_3": 0.5,
+        "status": "complete"
+      }
+    }
+  ]
+}

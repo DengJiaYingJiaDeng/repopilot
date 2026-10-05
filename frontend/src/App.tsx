@@ -60,7 +60,7 @@ const methodNames: Record<string, string> = {
 const toolNames: Record<string, string> = {
   read_file: '读取源码',
   search_code: '搜索代码',
-  find_symbol: '查找符号',
+  find_symbol: '查找定义与赋值',
   find_callers: '查找候选调用方',
 }
 
@@ -121,6 +121,11 @@ function ToolDetails({ output }: { output: string }) {
               {item.match_kind === 'name_candidate' && (
                 <p className="caller-note">
                   按名称匹配的候选调用位置；尚未解析类型、别名或动态分派，需阅读源码确认。
+                </p>
+              )}
+              {(item.kind === 'assignment' || item.kind === 'import') && (
+                <p className="caller-note">
+                  {item.kind === 'assignment' ? '赋值或声明候选' : '导入位置'}；需继续阅读源码，确认实际运行时使用的值。
                 </p>
               )}
               <pre>{String(item.content ?? '')}</pre>

@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-05",
+  "experiment": "v2.2 fixed ten-case development-set model comparison",
+  "model_4b": {
+    "repository": "https://huggingface.co/Qwen/Qwen3-4B-GGUF",
+    "revision": "bc640142c66e1fdd12af0bd68f40445458f3869b",
+    "file": "Qwen3-4B-Q4_K_M.gguf",
+    "sha256": "7485fe6f11af29433bc51cab58009521f205840f5b4ae3a32fa7f92e8534fdf5",
+    "bytes": 2497280256
+  },
+  "model_8b": {
+    "repository": "https://huggingface.co/Qwen/Qwen3-8B-GGUF",
+    "revision": "6a569868d07d3bd59e8b97fb001bf8c0b254bb20",
+    "file": "Qwen3-8B-Q4_K_M.gguf",
+    "sha256": "d98cdcbd03e17ce47681435b5150e34c1417f50b5c0019dd560e4882c5745785",
+    "bytes": 5027783488
+  },
+  "runtime": {
+    "project": "ggml-org/llama.cpp",
+    "release": "b11382",
+    "commit": "11fe02151",
+    "backend": "Vulkan",
+    "context_tokens": 16384,
+    "slots": 1,
+    "thinking": false,
+    "temperature": 0,
+    "hardware": "NVIDIA RTX 3080 Ti 12 GB"
+  },
+  "agent": {
+    "workflow": "langgraph",
+    "initial_retrieval": "bm25",
+    "max_tool_calls": 6,
+    "first_turn_policy": "required read_file; subsequent turns auto"
+  },
+  "timing_note": "Single sequential run with loaded model; includes in-process FastAPI + LangGraph and localhost LLM calls. Not a concurrency or cold-start benchmark."
+}

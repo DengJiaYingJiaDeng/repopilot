@@ -71,3 +71,7 @@ python scripts/compare_read_coverage.py evaluation/investigation_cases.jsonl \
 ```
 
 Only successful `read_file` ranges with complete returned lines count. The dataset labels are read after the investigation and never sent to the model.
+
+## Symbol navigation follow-up
+
+The [symbol navigation report](V2_2_REPORT.md) records AST-based assignment/import lookup, ten-case file coverage, and remaining causal errors. This is a development-set result; file recall is not diagnosis accuracy.

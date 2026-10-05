@@ -26,6 +26,7 @@ def create_mcp_server(repository: Path, settings: Settings | None = None) -> MCP
             {
                 "file_path": item.chunk.file_path,
                 "symbol": item.chunk.symbol_name,
+                "kind": item.chunk.symbol_type,
                 "start_line": item.chunk.start_line,
                 "end_line": item.chunk.end_line,
                 "score": item.score,
@@ -41,11 +42,12 @@ def create_mcp_server(repository: Path, settings: Settings | None = None) -> MCP
 
     @server.tool()
     def find_symbol(name: str) -> list[dict[str, Any]]:
-        """Find matching Python classes and functions in the indexed snapshot."""
+        """Find Python functions, classes, assignments, and imports in the snapshot."""
         return [
             {
                 "file_path": item.chunk.file_path,
                 "symbol": item.chunk.symbol_name,
+                "kind": item.chunk.symbol_type,
                 "start_line": item.chunk.start_line,
                 "end_line": item.chunk.end_line,
                 "content": item.chunk.content[:2000],

@@ -22,6 +22,7 @@ from repopilot.retrieval import (
     Retriever,
     VectorRetriever,
 )
+from repopilot.symbol_sites import index_symbol_sites
 
 
 class RepoPilotService:
@@ -72,6 +73,7 @@ class RepoPilotService:
         self._chunks: list[CodeChunk] = []
         self._indexed = False
         self._call_sites: dict[str, list[CallSite]] = {}
+        self._symbol_sites: dict[str, list[CodeChunk]] = {}
 
     def index(self, path: Path) -> IndexSummary:
         scan = scan_repository(path, self.settings.allowed_root, self.settings.max_file_bytes)
@@ -96,6 +98,7 @@ class RepoPilotService:
         for retriever in self._index_targets:
             retriever.index(chunks)
         self._call_sites = index_calls(indexed_files)
+        self._symbol_sites = index_symbol_sites(indexed_files, scan.repository)
         self._indexed_files = indexed_files
         self._chunks = chunks
         self._indexed = True
@@ -144,17 +147,43 @@ class RepoPilotService:
             raise ValueError("File is not in the indexed snapshot") from exc
 
     def find_symbol(self, name: str, top_k: int = 10) -> list[ScoredChunk]:
+        """Find named functions, classes, assignments, and imports in the snapshot."""
         if not self._indexed:
             raise IndexNotReadyError("Index a repository before finding symbols")
         query = name.casefold()
         matches = [
-            ScoredChunk(chunk=chunk, score=1.0)
+            ScoredChunk(
+                chunk=chunk,
+                score=(
+                    3.0
+                    if chunk.symbol_name
+                    and (
+                        chunk.symbol_name.casefold() == query
+                        or chunk.symbol_name.casefold().endswith("." + query)
+                    )
+                    else 1.0
+                ),
+            )
             for chunk in self._chunks
             if chunk.symbol_type in {"class", "function", "async_function"}
             and chunk.symbol_name
             and query in chunk.symbol_name.casefold()
         ]
-        matches.sort(key=lambda item: (item.chunk.file_path, item.chunk.start_line))
+        for site in self._symbol_sites.get(name.rsplit(".", 1)[-1].casefold(), []):
+            matches.append(
+                ScoredChunk(chunk=site, score=2.5 if site.symbol_type == "assignment" else 2.0)
+            )
+        matches.sort(
+            key=lambda item: (
+                -item.score,
+                any(
+                    part == "tests" or part.startswith("test_")
+                    for part in item.chunk.file_path.split("/")
+                ),
+                item.chunk.file_path,
+                item.chunk.start_line,
+            )
+        )
         return matches[:top_k]
 
     def find_callers(self, name: str, top_k: int = 10) -> list[CallSite]:
