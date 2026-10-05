@@ -95,3 +95,11 @@ The current tokenizer uses English letters and digits, with underscore and camel
 - Fixed workbench restart preflight falsely reporting TIME_WAIT ports as occupied; actual listening services still prevent startup.
 - Local verification: 70 Python tests, 7 frontend tests, Ruff/mypy and production build. The checkout preparation script was exercised against cached repositories without executing upstream code.
 - Chinese rendering now translates prose arrays only; paths and line numbers are retained by application code, with dedicated tests.
+
+## v0.9 follow-up — Source read boundaries and a rejected gap heuristic (2026-10-05)
+
+- Investigated the V2 cited-file recall drop by separating initial retrieval, successful `read_file` coverage, and final citations. Added a reproducible read-coverage comparator that rejects mismatched datasets and repository revisions.
+- Prototyped a bounded automatic read of function implementations named in the draft. Three implementation variants on the same 10 development cases produced cited-file Recall@3 of 0.95, 0.80, and 0.65, with 8/10, 9/10, and 10/10 provenance-complete reports respectively. The heuristic depended on the model naming the right function and was removed from the default path.
+- Corrected `read_file` so its returned `end_line` reflects only complete source lines under the 8,000-character output cap. Continuation flags now describe only an incompletely returned requested range; a short read no longer advertises the rest of the file as a continuation.
+- The final boundary-only run yielded 10/10 protocol-complete and provenance-complete reports, but cited-file Recall@3 was 0.65 versus V2's 0.70. This is a tool-output correctness fix, not an accuracy improvement. See `evaluation/V2_1_REPORT.md` for the runs and limitations.
+- Local verification: 73 Python tests, Ruff, and mypy. The frontend was unchanged; its existing 7 tests and production build remained the prior validated state.

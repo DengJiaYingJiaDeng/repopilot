@@ -60,3 +60,14 @@ python -m repopilot.benchmark evaluation/results/v2_baseline.json \
 `--private-output /outside/repository/directory` optionally saves full source traces for local review. Public run artifacts omit upstream source excerpts. The runner rejects a dirty/wrong Git checkout and missing labels. The comparison rejects different datasets, model/settings, case sets, duplicate IDs, or revisions; failed cases stay in the denominator.
 
 The baseline was run before V2 code changes at commit `43bf904`. Intermediate failed runs remain in `results/v2_candidate.json` and `results/v2_draft_conditioned.json`. A `source_digest` identifies the Python source snapshot at run start, including uncommitted changes; `source_commit` alone is not the implementation identity for development runs.
+
+## Follow-up: actual source-read coverage
+
+The [follow-up report](V2_1_REPORT.md) compares source files retrieved, actually read, and finally cited. Reproduce the read-stage metric with:
+
+```bash
+python scripts/compare_read_coverage.py evaluation/investigation_cases.jsonl \
+  evaluation/results/v2_final.json evaluation/results/v2_1_read_boundary.json
+```
+
+Only successful `read_file` ranges with complete returned lines count. The dataset labels are read after the investigation and never sent to the model.

@@ -1,0 +1,406 @@
+{
+  "dataset_sha256": "476fa9877005bfddf1508b64a48f37e59f16df0283a57b55b895d1ff3957a161",
+  "runs": [
+    {
+      "source_digest": "75fbecd3f642245daa31823d17bf4a07c073c7e77bf8a9ce30b52da363112c2f",
+      "mean_read_recall_at_3": 0.7,
+      "cases": [
+        {
+          "issue_id": "pallets/click#3019",
+          "read_files": [
+            "src/click/termui.py",
+            "src/click/core.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "pallets/click#2952",
+          "read_files": [
+            "src/click/core.py"
+          ],
+          "read_recall_at_3": 0.5
+        },
+        {
+          "issue_id": "pallets/click#2836",
+          "read_files": [
+            "src/click/core.py",
+            "src/click/termui.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "pallets/click#3015",
+          "read_files": [
+            "src/click/types.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "pallets/click#3043",
+          "read_files": [
+            "src/click/shell_completion.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "psf/requests#PR7502",
+          "read_files": [
+            "src/requests/models.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "psf/requests#PR7433",
+          "read_files": [
+            "src/requests/utils.py",
+            "src/requests/sessions.py"
+          ],
+          "read_recall_at_3": 0.0
+        },
+        {
+          "issue_id": "psf/requests#PR7309",
+          "read_files": [
+            "src/requests/utils.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "psf/requests#PR7308",
+          "read_files": [
+            "src/requests/utils.py"
+          ],
+          "read_recall_at_3": 0.0
+        },
+        {
+          "issue_id": "psf/requests#PR7425",
+          "read_files": [
+            "src/requests/_types.py"
+          ],
+          "read_recall_at_3": 0.5
+        }
+      ]
+    },
+    {
+      "source_digest": "02787a06db6b3752494011511cfa486efabda43d213c6aa5d817b1ead5c4030d",
+      "mean_read_recall_at_3": 0.95,
+      "cases": [
+        {
+          "issue_id": "pallets/click#3019",
+          "read_files": [
+            "src/click/termui.py",
+            "src/click/core.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "pallets/click#2952",
+          "read_files": [
+            "src/click/core.py"
+          ],
+          "read_recall_at_3": 0.5
+        },
+        {
+          "issue_id": "pallets/click#2836",
+          "read_files": [
+            "src/click/core.py",
+            "src/click/termui.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "pallets/click#3015",
+          "read_files": [
+            "src/click/types.py",
+            "src/click/core.py",
+            "src/click/shell_completion.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "pallets/click#3043",
+          "read_files": [
+            "src/click/shell_completion.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "psf/requests#PR7502",
+          "read_files": [
+            "src/requests/models.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "psf/requests#PR7433",
+          "read_files": [
+            "src/requests/utils.py",
+            "src/requests/sessions.py",
+            "src/requests/models.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "psf/requests#PR7309",
+          "read_files": [
+            "src/requests/utils.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "psf/requests#PR7308",
+          "read_files": [
+            "src/requests/utils.py",
+            "src/requests/_internal_utils.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "psf/requests#PR7425",
+          "read_files": [
+            "src/requests/_types.py",
+            "src/requests/sessions.py"
+          ],
+          "read_recall_at_3": 1.0
+        }
+      ]
+    },
+    {
+      "source_digest": "7e798d935a374082dae2510444c315b780175add0e3582b15776b44cf9f997ac",
+      "mean_read_recall_at_3": 0.85,
+      "cases": [
+        {
+          "issue_id": "pallets/click#3019",
+          "read_files": [
+            "src/click/termui.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "pallets/click#2952",
+          "read_files": [
+            "src/click/core.py"
+          ],
+          "read_recall_at_3": 0.5
+        },
+        {
+          "issue_id": "pallets/click#2836",
+          "read_files": [
+            "src/click/core.py",
+            "src/click/termui.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "pallets/click#3015",
+          "read_files": [
+            "src/click/types.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "pallets/click#3043",
+          "read_files": [
+            "src/click/shell_completion.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "psf/requests#PR7502",
+          "read_files": [
+            "src/requests/models.py",
+            "src/requests/utils.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "psf/requests#PR7433",
+          "read_files": [
+            "src/requests/utils.py",
+            "src/requests/sessions.py"
+          ],
+          "read_recall_at_3": 0.0
+        },
+        {
+          "issue_id": "psf/requests#PR7309",
+          "read_files": [
+            "src/requests/utils.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "psf/requests#PR7308",
+          "read_files": [
+            "src/requests/utils.py",
+            "src/requests/_internal_utils.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "psf/requests#PR7425",
+          "read_files": [
+            "src/requests/_types.py",
+            "src/requests/sessions.py"
+          ],
+          "read_recall_at_3": 1.0
+        }
+      ]
+    },
+    {
+      "source_digest": "c0a887f217cbb7d550d1bb4abd4538034fbd1866045a54b820b852847fd9dcf2",
+      "mean_read_recall_at_3": 0.65,
+      "cases": [
+        {
+          "issue_id": "pallets/click#3019",
+          "read_files": [
+            "src/click/termui.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "pallets/click#2952",
+          "read_files": [
+            "src/click/core.py"
+          ],
+          "read_recall_at_3": 0.5
+        },
+        {
+          "issue_id": "pallets/click#2836",
+          "read_files": [
+            "src/click/core.py"
+          ],
+          "read_recall_at_3": 0.5
+        },
+        {
+          "issue_id": "pallets/click#3015",
+          "read_files": [
+            "src/click/types.py",
+            "src/click/core.py",
+            "src/click/shell_completion.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "pallets/click#3043",
+          "read_files": [
+            "src/click/shell_completion.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "psf/requests#PR7502",
+          "read_files": [
+            "src/requests/models.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "psf/requests#PR7433",
+          "read_files": [
+            "src/requests/utils.py",
+            "src/requests/sessions.py"
+          ],
+          "read_recall_at_3": 0.0
+        },
+        {
+          "issue_id": "psf/requests#PR7309",
+          "read_files": [
+            "src/requests/utils.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "psf/requests#PR7308",
+          "read_files": [
+            "src/requests/utils.py"
+          ],
+          "read_recall_at_3": 0.0
+        },
+        {
+          "issue_id": "psf/requests#PR7425",
+          "read_files": [
+            "src/requests/sessions.py"
+          ],
+          "read_recall_at_3": 0.5
+        }
+      ]
+    },
+    {
+      "source_digest": "631f86a654036f2180893779ed4404b1bc8c1e26cfb8e6f4de0acb0d0fd3ae8b",
+      "mean_read_recall_at_3": 0.65,
+      "cases": [
+        {
+          "issue_id": "pallets/click#3019",
+          "read_files": [
+            "src/click/termui.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "pallets/click#2952",
+          "read_files": [
+            "src/click/core.py"
+          ],
+          "read_recall_at_3": 0.5
+        },
+        {
+          "issue_id": "pallets/click#2836",
+          "read_files": [
+            "src/click/core.py"
+          ],
+          "read_recall_at_3": 0.5
+        },
+        {
+          "issue_id": "pallets/click#3015",
+          "read_files": [
+            "src/click/types.py",
+            "src/click/core.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "pallets/click#3043",
+          "read_files": [
+            "src/click/shell_completion.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "psf/requests#PR7502",
+          "read_files": [
+            "src/requests/models.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "psf/requests#PR7433",
+          "read_files": [
+            "src/requests/utils.py",
+            "src/requests/sessions.py"
+          ],
+          "read_recall_at_3": 0.0
+        },
+        {
+          "issue_id": "psf/requests#PR7309",
+          "read_files": [
+            "src/requests/utils.py"
+          ],
+          "read_recall_at_3": 1.0
+        },
+        {
+          "issue_id": "psf/requests#PR7308",
+          "read_files": [
+            "src/requests/utils.py"
+          ],
+          "read_recall_at_3": 0.0
+        },
+        {
+          "issue_id": "psf/requests#PR7425",
+          "read_files": [
+            "src/requests/sessions.py"
+          ],
+          "read_recall_at_3": 0.5
+        }
+      ]
+    }
+  ]
+}

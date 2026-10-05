@@ -14,6 +14,7 @@ from repopilot.api.app import create_app
 from repopilot.config import Settings
 from repopilot.domain import ModelProviderError
 from repopilot.local_model import LocalChatModel
+from repopilot.service import RepoPilotService
 
 
 def chat_response(message: dict[str, Any], finish_reason: str = "stop") -> bytes:
@@ -364,3 +365,37 @@ def test_prose_translation_retains_paths_and_line_numbers(monkeypatch: MonkeyPat
     ]
     assert translated["uncertainties"] == ["尚未确定"]
     assert source and note
+
+
+def test_read_tool_reports_only_complete_lines_after_character_cap(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / "long.py").write_text(("# " + "a" * 100 + "\n") * 200)
+    service = RepoPilotService(Settings(allowed_root=tmp_path))
+    service.index(repo)
+    investigator = Investigator(service, FakeModel([]))
+    _, output = investigator._run_tool(
+        "read_file", '{"path":"long.py","start_line":1,"end_line":200}'
+    )
+    result = json.loads(output)
+    numbered = result["content"].splitlines()
+    assert result["content_truncated"] is True
+    assert result["end_line"] == len(numbered)
+    assert result["next_start_line"] == len(numbered) + 1
+    assert numbered[-1] == f"{len(numbered)}: # " + "a" * 100
+
+
+def test_read_tool_does_not_request_continuation_past_selected_range(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / "long.py").write_text("def first(): pass\n" * 100)
+    service = RepoPilotService(Settings(allowed_root=tmp_path))
+    service.index(repo)
+    investigator = Investigator(service, FakeModel([]))
+    _, output = investigator._run_tool(
+        "read_file", '{"path":"long.py","start_line":1,"end_line":3}'
+    )
+    result = json.loads(output)
+    assert result["end_line"] == 3
+    assert result["more_lines"] is False
+    assert result["next_start_line"] is None

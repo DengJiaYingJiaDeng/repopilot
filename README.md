@@ -35,6 +35,10 @@ issue text -> keyword / BM25 / optional vector + hybrid + reranker
 
 V0.9 adds Python caller candidates, line-by-line citation provenance checks, explicit uncertainty/review states, and a bounded structured synthesis step for the local model. Ten pinned Click/Requests cases compare the original and updated investigation pipeline. See the [V2 results and limitations](evaluation/V2_REPORT.md). Citation verification is **not** root-cause verification.
 
+## V2 follow-up: complete source-read boundaries
+
+A later experiment tested automatic reads of functions named in draft explanations. Results varied across implementation variants and did not establish a reliable recall or diagnosis gain, so the automatic heuristic was withdrawn. The retained change makes `read_file` report only complete returned lines and gives continuation markers only when the requested range is incomplete. The [follow-up report](evaluation/V2_1_REPORT.md) includes all runs, failure cases, and a separate metric for files actually read.
+
 ## Visual workbench (v0.9)
 
 An independent React/TypeScript frontend turns investigation JSON into four views: **summary, code evidence, tool-call timeline, and proposed tests**. It supports local JSON import/export and live investigations through FastAPI. New investigations can request Chinese prose; historical/imported output is kept unchanged.
